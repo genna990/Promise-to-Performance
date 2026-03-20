@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Municipal Promise-to-Performance Dashboard · Namakwa District Pilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript></noscript>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#070d1a;
+  --bg2:#0c1428;
+  --bg3:#101c34;
+  --card:#111d33;
+  --card2:#152040;
+  --border:rgba(255,255,255,.07);
+  --border2:rgba(6,182,212,.25);
+  --c1:#06b6d4;
+  --c2:#22c55e;
+  --c3:#f59e0b;
+  --c4:#ef4444;
+  --c5:#a855f7;
+  --c6:#3b82f6;
+  --white:#f0f6ff;
+  --text:#94a3b8;
+  --muted:#475569;
+  --radius:14px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;min-height:100vh}
+
+/* NOISE TEXTURE */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4}
+
+/* GLOW BLOBS */
+.blob{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+.blob1{width:600px;height:600px;background:rgba(6,182,212,.07);top:-200px;right:-100px}
+.blob2{width:500px;height:500px;background:rgba(168,85,247,.06);bottom:-100px;left:-100px}
+.blob3{width:400px;height:400px;background:rgba(34,197,94,.05);top:40%;left:40%}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(7,13,26,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:64px;display:flex;align-items:center;padding:0 28px;gap:8px}
+.nav-logo{display:flex;align-items:center;gap:10px;margin-right:auto;text-decoration:none}
+.nav-logo-badge{width:36px;height:36px;background:linear-gradient(135deg,var(--c1),var(--c5));border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#fff;letter-spacing:-1px}
+.nav-logo-name{font-weight:800;font-size:14px;color:var(--white);letter-spacing:-.3px}
+.nav-logo-sub{font-size:10px;color:var(--c1);letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.nav-link{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:all .2s;border:1px solid transparent;white-space:nowrap;background:none;display:flex;align-items:center;gap:5px}
+.nav-link:hover{color:var(--white);background:rgba(255,255,255,.05)}
+.nav-link.on{color:var(--white);background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.2)}
+.nav-right{display:flex;align-items:center;gap:8px;margin-left:12px}
+.role-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s}
+.role-btn:hover{border-color:var(--border2);color:var(--c1)}
+.role-btn.on{background:rgba(6,182,212,.12);border-color:var(--border2);color:var(--c1)}
+.login-btn{padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;background:var(--c1);color:#000;border:none;cursor:pointer;transition:all .2s}
+.login-btn:hover{background:#0ea5e9}
+
+/* PAGES */
+.page{display:none;position:relative;z-index:1}
+.page.on{display:block}
+
+/* ── HOME PAGE ── */
+.hero{text-align:center;padding:90px 24px 60px;max-width:820px;margin:0 auto}
+.hero-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 16px;border-radius:20px;border:1px solid rgba(6,182,212,.3);background:rgba(6,182,212,.07);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--c1);letter-spacing:2px;text-transform:uppercase;margin-bottom:28px}
+.hero-dot{width:6px;height:6px;background:var(--c1);border-radius:50%;animation:pu 1.6s infinite}
+@keyframes pu{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.5)}}
+.hero h1{font-size:clamp(44px,6vw,80px);font-weight:900;line-height:1.05;letter-spacing:-2px;background:linear-gradient(135deg,var(--white) 0%,var(--c1) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero h1 span{display:block;font-size:clamp(28px,4vw,48px);font-weight:300;letter-spacing:-1px;background:linear-gradient(135deg,var(--text),var(--white));-webkit-background-clip:text;background-clip:text}
+.hero-sub{font-size:17px;color:var(--text);line-height:1.7;margin:20px auto 36px;max-width:560px}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-primary{padding:13px 28px;border-radius:10px;font-size:14px;font-weight:700;background:var(--c1);color:#000;border:none;cursor:pointer;transition:all .25s;letter-spacing:-.2px}
+.btn-primary:hover{background:#0ea5e9;transform:translateY(-2px);box-shadow:0 8px 24px rgba(6,182,212,.3)}
+.btn-ghost{padding:13px 28px;border-radius:10px;font-size:14px;font-weight:600;background:rgba(255,255,255,.05);color:var(--white);border:1px solid var(--border);cursor:pointer;transition:all .25s}
+.btn-ghost:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.15)}
+
+/* KPI STRIP */
+.kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;padding:0 24px 48px;max-width:1300px;margin:0 auto}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px 18px;text-align:center;transition:all .25s;cursor:default}
+.kpi:hover{border-color:var(--border2);transform:translateY(-2px)}
+.kpi-val{font-size:38px;font-weight:900;line-height:1;margin-bottom:6px;letter-spacing:-1px}
+.kpi-label{font-size:11px;color:var(--text);font-weight:500;letter-spacing:.3px}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px;font-family:'JetBrains Mono',monospace}
+
+/* IDP PRIORITIES BANNER */
+.idp-banner{max-width:1300px;margin:0 auto 48px;padding:0 24px}
+.idp-banner-title{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px}
+.idp-pills{display:flex;gap:8px;flex-wrap:wrap}
+.idp-pill{padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px}
+.idp-pill:hover{border-color:var(--border2);color:var(--white)}
+.idp-pill.on{color:#000;border-color:transparent}
+.idp-dot{width:8px;height:8px;border-radius:50%}
+
+/* SECTION WRAPPER */
+.wrap{max-width:1300px;margin:0 auto;padding:0 24px 60px}
+.page-head{padding:48px 24px 32px;max-width:1300px;margin:0 auto}
+.page-head h2{font-size:clamp(28px,4vw,44px);font-weight:900;letter-spacing:-1px;margin-bottom:8px}
+.page-head p{font-size:15px;color:var(--text);max-width:560px;line-height:1.7}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:all .25s}
+.card:hover{border-color:rgba(255,255,255,.12)}
+.card-title{font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px}
+.card-sub{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+
+/* PROMISE CARDS */
+.promises-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.promise-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;transition:all .25s;position:relative;overflow:hidden}
+.promise-card:hover{border-color:rgba(255,255,255,.14);transform:translateY(-2px)}
+.promise-card.completed{border-left:3px solid var(--c2)}
+.promise-card.inprogress{border-left:3px solid var(--c1)}
+.promise-card.pending{border-left:3px solid var(--c3)}
+.promise-card.flagged{border-left:3px solid var(--c4)}
+.pc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.pc-category{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.status-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px;white-space:nowrap}
+.sb-completed{background:rgba(34,197,94,.15);color:var(--c2);border:1px solid rgba(34,197,94,.2)}
+.sb-inprogress{background:rgba(6,182,212,.12);color:var(--c1);border:1px solid rgba(6,182,212,.2)}
+.sb-pending{background:rgba(245,158,11,.12);color:var(--c3);border:1px solid rgba(245,158,11,.2)}
+.sb-flagged{background:rgba(239,68,68,.12);color:var(--c4);border:1px solid rgba(239,68,68,.2)}
+.pc-title{font-size:17px;font-weight:800;color:var(--white);margin-bottom:8px;letter-spacing:-.3px;line-height:1.3}
+.pc-meta{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.pc-meta-item{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.pc-claim{background:rgba(6,182,212,.06);border-left:2px solid var(--c1);padding:10px 12px;border-radius:0 6px 6px 0;margin-bottom:12px}
+.pc-claim-label{font-size:10px;color:var(--c1);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.pc-claim-text{font-size:13px;color:var(--text);line-height:1.5}
+.pc-verified{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--c2);font-weight:600;margin-bottom:10px}
+.pc-flagged{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:10px 12px;margin-bottom:12px}
+.pc-flagged-label{font-size:10px;color:var(--c4);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.pc-flagged-text{font-size:12px;color:rgba(239,68,68,.8);line-height:1.5}
+/* NEW: budget tracker */
+.pc-budget{display:flex;align-items:center;gap:8px;margin-bottom:10px;background:rgba(255,255,255,.03);border-radius:8px;padding:8px 10px}
+.pc-budget-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.pc-budget-bar{flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.pc-budget-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--c1),var(--c2))}
+.pc-budget-val{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--white);font-weight:600;flex-shrink:0}
+/* community feedback */
+.pc-feedback-head{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.feedback-item{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}
+.feedback-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+.feedback-body{font-size:12px;color:var(--text);line-height:1.5}
+.feedback-meta{font-size:10px;color:var(--muted);margin-bottom:2px}
+.feedback-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--white);outline:none;font-family:'Inter',sans-serif;resize:none}
+.feedback-input:focus{border-color:var(--border2)}
+.feedback-input::placeholder{color:var(--muted)}
+.post-btn{padding:7px 16px;background:var(--c1);color:#000;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px;transition:all .2s}
+.post-btn:hover{background:#0ea5e9}
+
+/* IDP FILTER TABS */
+.filter-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:28px}
+.ftab{padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s}
+.ftab:hover{border-color:rgba(255,255,255,.18);color:var(--white)}
+.ftab.on{background:var(--c1);color:#000;border-color:var(--c1)}
+
+/* DISTRICT MAP */
+.muni-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.muni-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;cursor:pointer;transition:all .25s}
+.muni-card:hover{border-color:var(--border2);background:var(--card2);transform:translateY(-2px)}
+.muni-name{font-size:20px;font-weight:800;color:var(--white);margin-bottom:6px;letter-spacing:-.3px}
+.muni-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.ward-link{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text);padding:4px 0;cursor:pointer;transition:color .15s}
+.ward-link:hover{color:var(--c1)}
+.ward-link::before{content:'›';color:var(--c1);font-size:14px}
+.muni-more{font-size:11px;color:var(--muted);margin-top:6px;font-style:italic}
+/* NEW: muni performance bar */
+.muni-perf{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.muni-perf-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.muni-perf-label{font-size:11px;color:var(--muted)}
+.muni-perf-val{font-size:13px;font-weight:700}
+.muni-bar{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-bottom:2px}
+.muni-bar-fill{height:100%;border-radius:2px}
+
+/* VERIFICATION */
+.role-tabs{display:flex;gap:6px;margin-bottom:22px}
+.rtab{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.rtab:hover{border-color:var(--border2);color:var(--c1)}
+.rtab.on{background:rgba(6,182,212,.12);border-color:var(--border2);color:var(--c1)}
+.role-notice{padding:12px 16px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:9px;font-size:13px;color:var(--c3);margin-bottom:22px;display:flex;align-items:center;gap:8px}
+.verif-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.verif-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;transition:all .2s}
+.verif-card:hover{border-color:rgba(255,255,255,.12)}
+.verif-title{font-size:15px;font-weight:700;color:var(--white);margin-bottom:3px}
+.verif-loc{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.5px;margin-bottom:12px}
+.verif-claim{background:rgba(255,255,255,.03);border-radius:8px;padding:10px 12px;margin-bottom:12px;border-left:2px solid var(--c1)}
+.verif-claim-label{font-size:10px;color:var(--c1);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+.verif-claim-text{font-size:13px;color:var(--text);line-height:1.5}
+.verif-notes{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--white);resize:none;outline:none;font-family:'Inter',sans-serif;min-height:72px}
+.verif-notes:focus{border-color:var(--border2)}
+.verif-notes::placeholder{color:var(--muted)}
+.verif-note-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;font-family:'JetBrains Mono',monospace}
+.verif-actions{display:flex;gap:8px;margin-top:10px}
+.vbtn{padding:8px 14px;border-radius:7px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
+.vbtn-approve{background:rgba(34,197,94,.15);color:var(--c2);border:1px solid rgba(34,197,94,.2)}
+.vbtn-approve:hover{background:rgba(34,197,94,.25)}
+.vbtn-flag{background:rgba(239,68,68,.12);color:var(--c4);border:1px solid rgba(239,68,68,.2)}
+.vbtn-flag:hover{background:rgba(239,68,68,.22)}
+/* NEW: evidence upload */
+.evidence-upload{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.03);border:1px dashed var(--border);border-radius:8px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .2s;margin-top:8px}
+.evidence-upload:hover{border-color:var(--border2);color:var(--c1)}
+
+/* LEADERBOARD */
+.lb-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;display:flex;align-items:center;gap:16px;margin-bottom:12px;transition:all .25s;cursor:pointer}
+.lb-item:hover{border-color:rgba(255,255,255,.14);transform:translateX(4px)}
+.lb-rank{font-size:22px;font-weight:900;color:var(--muted);width:36px;text-align:center;flex-shrink:0}
+.lb-rank.top{color:var(--c3)}
+.lb-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0;color:#fff}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-size:16px;font-weight:700;color:var(--white);letter-spacing:-.2px}
+.lb-ward{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.lb-right{text-align:right;flex-shrink:0}
+.lb-pct{font-size:28px;font-weight:900;letter-spacing:-1px}
+.lb-pct-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.lb-bar-wrap{flex:1;max-width:220px}
+.lb-bar-track{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-top:6px}
+.lb-bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
+/* NEW: score breakdown */
+.lb-breakdown{display:flex;gap:10px;margin-top:6px}
+.lb-score-item{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:3px}
+.lb-score-dot{width:5px;height:5px;border-radius:50%}
+/* NEW: trend badge */
+.lb-trend{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:8px}
+.trend-up{background:rgba(34,197,94,.12);color:var(--c2)}
+.trend-down{background:rgba(239,68,68,.12);color:var(--c4)}
+.trend-flat{background:rgba(255,255,255,.06);color:var(--muted)}
+
+/* SALGA REPORT */
+.salga-header{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.salga-title{font-size:22px;font-weight:900;color:var(--white);letter-spacing:-.5px;margin-bottom:4px}
+.salga-sub{font-size:13px;color:var(--muted)}
+.print-btn{padding:11px 22px;background:var(--c1);color:#000;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s}
+.print-btn:hover{background:#0ea5e9;transform:translateY(-1px);box-shadow:0 6px 20px rgba(6,182,212,.3)}
+.salga-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.salga-kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;text-align:center}
+.salga-kpi-val{font-size:36px;font-weight:900;letter-spacing:-1px;line-height:1;margin-bottom:5px}
+.salga-kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'JetBrains Mono',monospace}
+/* NEW: cross-municipality comparison */
+.comp-table{width:100%;border-collapse:collapse;background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.comp-table th{background:rgba(255,255,255,.04);padding:12px 16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:600;border-bottom:1px solid var(--border)}
+.comp-table td{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:14px;vertical-align:middle}
+.comp-table tr:last-child td{border-bottom:none}
+.comp-table tr:hover td{background:rgba(255,255,255,.02)}
+.comp-name{font-weight:700;color:var(--white)}
+.comp-name.highlight{color:var(--c1)}
+.comp-bar-cell{width:160px}
+.comp-bar{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.comp-bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.comp-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px}
+/* NEW: IDP progress tracker */
+.idp-tracker{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+.idp-track-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.idp-track-name{font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.idp-track-sub{font-size:11px;color:var(--muted);margin-bottom:12px}
+.idp-prog-bar{height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.idp-prog-fill{height:100%;border-radius:4px}
+.idp-prog-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+/* section 71 alert */
+.s71-alert{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;gap:14px}
+.s71-icon{font-size:22px;flex-shrink:0}
+.s71-title{font-size:14px;font-weight:700;color:var(--c4);margin-bottom:3px}
+.s71-text{font-size:12px;color:rgba(239,68,68,.7);line-height:1.5}
+
+/* DISTRICT PERF SUMMARY TABLE */
+.dp-table{width:100%;border-collapse:collapse;background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.dp-table th{background:rgba(255,255,255,.04);padding:11px 16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.dp-table td{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;vertical-align:middle}
+.dp-table tr:last-child td{border-bottom:none}
+.dp-table tr:hover td{background:rgba(255,255,255,.02)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:28px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:relative;z-index:1}
+.footer-text{font-size:11px;color:rgba(255,255,255,.2);letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.footer-pills{display:flex;gap:6px;flex-wrap:wrap}
+.footer-pill{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--c1);border:1px solid rgba(6,182,212,.25);padding:3px 9px;border-radius:0;font-family:'JetBrains Mono',monospace}
+
+/* SEARCH BAR */
+.search-bar{display:flex;gap:12px;max-width:620px;margin:0 auto 20px}
+.search-input{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:14px;color:var(--white);outline:none;font-family:'Inter',sans-serif}
+.search-input:focus{border-color:var(--border2)}
+.search-input::placeholder{color:var(--muted)}
+
+/* UTILS */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+.mt16{margin-top:16px}
+.mt24{margin-top:24px}
+.mb24{margin-bottom:24px}
+.divider{height:1px;background:var(--border);margin:20px 0}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 9px;border-radius:10px;letter-spacing:.5px;text-transform:uppercase}
+.tag-water{background:rgba(6,182,212,.12);color:var(--c1)}
+.tag-econ{background:rgba(34,197,94,.12);color:var(--c2)}
+.tag-infra{background:rgba(59,130,246,.12);color:var(--c6)}
+.tag-inst{background:rgba(168,85,247,.12);color:var(--c5)}
+.tag-social{background:rgba(245,158,11,.12);color:var(--c3)}
+
+@media (max-width:900px){
+  .kpi-strip{grid-template-columns:repeat(3,1fr)}
+  .promises-grid,.muni-grid,.verif-grid,.idp-tracker{grid-template-columns:1fr}
+  .salga-kpis{grid-template-columns:repeat(2,1fr)}
+  nav{padding:0 12px;gap:2px}
+  .nav-link{padding:6px 8px;font-size:12px}
+}
+
+@media print{
+  body{background:white;color:#000}
+  nav,.blob,.print-btn,.role-tabs,.filter-tabs,.feedback-input,.post-btn,.evidence-upload,footer,.hero-actions,.search-bar,.idp-pills,.ftab,.nav-right,.role-btn,.login-btn{display:none!important}
+  .page{display:block!important}
+  .card,.promise-card,.muni-card,.verif-card,.lb-item,.salga-kpi,.comp-table,.dp-table,.idp-track-card{background:white!important;border:1px solid #ddd!important;box-shadow:none!important;color:#000!important;-webkit-print-color-adjust:exact}
+  .salga-kpi-val,.lb-pct,.kpi-val,.comp-name{color:#000!important}
+  .page-head h2,.hero h1,.muni-name,.lb-name,.pc-title,.verif-title,.salga-title{color:#000!important}
+  *{-webkit-text-fill-color:unset!important}
+  @page{size:A4;margin:15mm}
+}
+/* ── DIGITAL ARCHIVE ── */
+.arc-cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.arc-cat{padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.arc-cat:hover{border-color:var(--border2);color:var(--white)}
+.arc-cat.on{background:var(--c1);color:#000;border-color:var(--c1)}
+.arc-search{display:flex;gap:10px;margin-bottom:24px}
+.arc-search-input{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:14px;color:var(--white);outline:none;font-family:'Inter',sans-serif}
+.arc-search-input:focus{border-color:var(--border2)}
+.arc-search-input::placeholder{color:var(--muted)}
+.arc-search-btn{padding:12px 22px;background:var(--c1);color:#000;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
+.arc-search-btn:hover{background:#0ea5e9}
+.arc-upload-box{background:var(--card);border:2px dashed rgba(6,182,212,.25);border-radius:14px;padding:32px 28px;margin-bottom:28px;transition:all .2s}
+.arc-upload-box:hover{border-color:rgba(6,182,212,.5);background:rgba(6,182,212,.03)}
+.arc-upload-title{font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.arc-upload-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.arc-form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.arc-form-full{grid-column:1/-1}
+.arc-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
+.arc-input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--white);font-size:13px;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s}
+.arc-input:focus{border-color:var(--border2)}
+.arc-input::placeholder{color:var(--muted)}
+.arc-select{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--white);font-size:13px;outline:none;font-family:'Inter',sans-serif;cursor:pointer}
+.arc-select option{background:#0c1428}
+.arc-file-zone{grid-column:1/-1;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.arc-file-btn{padding:10px 18px;border:1px dashed rgba(6,182,212,.3);border-radius:8px;font-size:12px;color:var(--c1);background:rgba(6,182,212,.05);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.arc-file-btn:hover{border-color:var(--c1);background:rgba(6,182,212,.1)}
+.arc-drive-input{flex:1;min-width:200px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--white);font-size:12px;outline:none;font-family:'Inter',sans-serif}
+.arc-drive-input:focus{border-color:var(--border2)}
+.arc-drive-input::placeholder{color:var(--muted)}
+.arc-submit{padding:11px 26px;background:var(--c1);color:#000;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+.arc-submit:hover{background:#0ea5e9;transform:translateY(-1px)}
+.arc-items{display:flex;flex-direction:column;gap:12px}
+.arc-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;align-items:flex-start;gap:16px;transition:all .2s;cursor:pointer}
+.arc-item:hover{border-color:rgba(255,255,255,.14);transform:translateX(3px)}
+.arc-item-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.arc-item-body{flex:1;min-width:0}
+.arc-item-title{font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px;line-height:1.3}
+.arc-item-meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.arc-item-tag{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.arc-item-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.arc-item-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.arc-item-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.arc-item-link{font-size:11px;color:var(--c1);text-decoration:none;display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace}
+.arc-item-link:hover{color:#0ea5e9}
+.arc-fingerprint{background:rgba(6,182,212,.05);border:1px solid rgba(6,182,212,.12);border-radius:8px;padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.arc-fp-item{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.arc-fp-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.arc-empty{text-align:center;padding:48px 24px;color:var(--muted);font-size:14px}
+.arc-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:28px}
+.arc-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.arc-stat-val{font-size:24px;font-weight:900;line-height:1;margin-bottom:4px}
+.arc-stat-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-badge">P²</div>
+    <div>
+      <div class="nav-logo-name">Namakwa District · Pilot</div>
+    </div>
+  </a>
+  <button class="nav-link on" onclick="showPage('home',this)">🏛 Home</button>
+  <button class="nav-link" onclick="showPage('map',this)">🗺 District Map</button>
+  <button class="nav-link" onclick="showPage('promises',this)">📋 Promises</button>
+  <button class="nav-link" onclick="showPage('ag',this)">📑 AG Compliance</button>
+  <button class="nav-link" onclick="showPage('verification',this)">🔍 Verification</button>
+  <button class="nav-link" onclick="showPage('leaderboard',this)">🏆 Leaderboard</button>
+  <button class="nav-link" onclick="showPage('salga',this)">📊 SALGA Report</button>
+  <button class="nav-link" onclick="showPage('archive',this)">🗄 Archive</button>
+  <div class="nav-right">
+    <button class="role-btn on" onclick="setRole('citizen',this)">👤 Citizen</button>
+    <button class="login-btn">Login</button>
+  </div>
+</nav>
+
+<!-- ══ HOME PAGE ══ -->
+<div class="page on" id="page-home">
+  <div class="hero">
+    <div class="hero-pill"><span class="hero-dot"></span>Civic Accountability · Namakwa District Pilot</div>
+    <h1>Municipal Promise-to-Performance<span>Dashboard</span></h1>
+    <p class="hero-sub">Track commitments, verify delivery, and hold ward councillors accountable. Real-time civic data for a transparent, empowered community.</p>
+    <div class="search-bar">
+      <input class="search-input" type="text" placeholder="Search for your ward...">
+      <button class="btn-primary" onclick="showPage('map',null)">Explore District Map</button>
+    </div>
+  </div>
+
+
+  <!-- DEBT IMPACT BANNER -->
+  <div style="max-width:1300px;margin:0 auto 28px;padding:0 24px">
+    <div style="background:linear-gradient(135deg,rgba(239,68,68,.08),rgba(245,158,11,.06));border:1px solid rgba(239,68,68,.2);border-radius:14px;padding:20px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <div style="font-size:36px;flex-shrink:0">⚠️</div>
+      <div style="flex:1;min-width:200px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(239,68,68,.7);letter-spacing:3px;text-transform:uppercase;margin-bottom:5px">National Treasury · Municipal Debt Crisis</div>
+        <div style="font-size:16px;font-weight:700;color:#f0f6ff;margin-bottom:4px">R427 Billion in municipal consumer debt nationally — and growing.</div>
+        <div style="font-size:13px;color:#94a3b8;line-height:1.6">When councillors fail to deliver on billing and revenue promises, debt grows. This dashboard tracks <strong style="color:#f0f6ff">which ward promises directly impact debt recovery</strong> — flagging the link between broken commitments and the financial crisis municipalities face.</div>
+      </div>
+      <div style="text-align:center;flex-shrink:0">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(239,68,68,.6);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Namakwa District</div>
+        <div style="font-size:32px;font-weight:900;color:#ef4444;letter-spacing:-1px">R12.4M</div>
+        <div style="font-size:11px;color:#94a3b8">consumer debt outstanding</div>
+      </div>
+    </div>
+  </div>
+  <div class="kpi-strip">
+    <div class="kpi"><div class="kpi-val" style="color:var(--c1)">6</div><div class="kpi-label">Promises Tracked</div><div class="kpi-sub">6 wards represented</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:var(--c2)">2</div><div class="kpi-label">Completed</div><div class="kpi-sub">2 steward-verified</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:var(--c1)">2</div><div class="kpi-label">In Progress</div><div class="kpi-sub">2 pending, 2 active</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:var(--c3)">33%</div><div class="kpi-label">Completion Rate</div><div class="kpi-sub">District average</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:var(--c2)">5</div><div class="kpi-label">Active Wards</div><div class="kpi-sub">Across 6 LMs</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:var(--c4)">1</div><div class="kpi-label">Flagged</div><div class="kpi-sub">Discrepancies</div></div>
+  </div>
+
+  <div class="idp-banner">
+    <div class="idp-banner-title">IDP Priority Areas — Filter by</div>
+    <div class="idp-pills">
+      <div class="idp-pill on" style="background:var(--c1);color:#000;border-color:var(--c1)" onclick="filterIDP('all',this)"><span class="idp-dot" style="background:#000"></span>All Priorities</div>
+      <div class="idp-pill" onclick="filterIDP('water',this)"><span class="idp-dot" style="background:var(--c1)"></span>Basic Service Delivery</div>
+      <div class="idp-pill" onclick="filterIDP('econ',this)"><span class="idp-dot" style="background:var(--c2)"></span>Local Economic Development</div>
+      <div class="idp-pill" onclick="filterIDP('infra',this)"><span class="idp-dot" style="background:var(--c6)"></span>Infrastructure Development</div>
+      <div class="idp-pill" onclick="filterIDP('inst',this)"><span class="idp-dot" style="background:var(--c5)"></span>Institutional Transformation</div>
+      <div class="idp-pill" onclick="filterIDP('social',this)"><span class="idp-dot" style="background:var(--c3)"></span>Social Development &amp; Safety</div>
+    </div>
+  </div>
+
+  <!-- S71 ALERT -->
+  <div class="wrap">
+    <div class="s71-alert">
+      <div class="s71-icon">⚠️</div>
+      <div>
+        <div class="s71-title">Section 71 Alert — Overdue Promise Flagged</div>
+        <div class="s71-text">Repair Main Road Potholes (Khai-Ma · Pofadder Ward) is 9 months overdue with a discrepancy flagged by Data Steward. MFMA Section 71 notification auto-generated. Municipal Manager has been notified.</div>
+      </div>
+    </div>
+
+    <!-- IDP PROGRESS TRACKER -->
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px">IDP Priority Progress — 2026</div>
+    <div class="idp-tracker mb24">
+      <div class="idp-track-card"><div class="idp-track-name"><span class="tag tag-water">●</span>Basic Service Delivery</div><div class="idp-track-sub">Water, sanitation, electricity, refuse removal</div><div class="idp-prog-bar"><div id="fill-water" class="idp-prog-fill" style="width:50%;background:linear-gradient(90deg,var(--c1),var(--c2));transition:width .8s ease"></div></div><div class="idp-prog-meta"><span id="meta-water">2 of 4 promises delivered</span><span id="pct-water" style="color:var(--c2);font-weight:700">50%</span></div></div>
+      <div class="idp-track-card"><div class="idp-track-name"><span class="tag tag-econ">●</span>Local Economic Development</div><div class="idp-track-sub">Jobs, SMMEs, tourism, Boegoebaai SEZ</div><div class="idp-prog-bar"><div id="fill-econ" class="idp-prog-fill" style="width:25%;background:linear-gradient(90deg,var(--c2),var(--c3));transition:width .8s ease"></div></div><div class="idp-prog-meta"><span id="meta-econ">1 of 4 promises delivered</span><span id="pct-econ" style="color:var(--c3);font-weight:700">25%</span></div></div>
+      <div class="idp-track-card"><div class="idp-track-name"><span class="tag tag-infra">●</span>Infrastructure Development</div><div class="idp-track-sub">Roads, bridges, bulk infrastructure</div><div class="idp-prog-bar"><div id="fill-infra" class="idp-prog-fill" style="width:33%;background:linear-gradient(90deg,var(--c6),var(--c1));transition:width .8s ease"></div></div><div class="idp-prog-meta"><span id="meta-infra">1 of 3 promises delivered</span><span id="pct-infra" style="color:var(--c6);font-weight:700">33%</span></div></div>
+      <div class="idp-track-card"><div class="idp-track-name"><span class="tag tag-social">●</span>Social Development &amp; Safety</div><div class="idp-track-sub">Youth, safety, community facilities</div><div class="idp-prog-bar"><div id="fill-social" class="idp-prog-fill" style="width:0%;background:linear-gradient(90deg,var(--c3),var(--c4));transition:width .8s ease"></div></div><div class="idp-prog-meta"><span id="meta-social">0 of 2 promises delivered</span><span id="pct-social" style="color:var(--c4);font-weight:700">0%</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DISTRICT MAP ══ -->
+<div class="page" id="page-map">
+  <div class="page-head">
+    <h2>District Map</h2>
+    <p>Select a municipality to explore its wards and councillor performance.</p>
+  </div>
+  <div class="wrap">
+    <div class="muni-grid">
+      <div class="muni-card" onclick="showPage('promises',null)">
+        <div class="muni-name">Nama Khoi</div>
+        <div class="muni-label">Active Wards</div>
+        <div class="ward-link">Okiep Ward</div>
+        <div class="ward-link">Nababeep Ward</div>
+        <div class="ward-link">Steinkopf Ward</div>
+        <div class="muni-more">+ 2 more wards</div>
+        <div class="muni-perf">
+          <div class="muni-perf-row"><span class="muni-perf-label">Promise Completion</span><span class="muni-perf-val" style="color:var(--c2)">50%</span></div>
+          <div class="muni-bar"><div class="muni-bar-fill" style="width:50%;background:linear-gradient(90deg,var(--c1),var(--c2))"></div></div>
+          <div class="muni-perf-row" style="margin-top:6px"><span class="muni-perf-label">Accountability Score</span><span class="muni-perf-val" style="color:var(--c3)">72/100</span></div>
+        </div>
+      </div>
+      <div class="muni-card" onclick="showPage('promises',null)">
+        <div class="muni-name">Khai-Ma</div>
+        <div class="muni-label">Active Wards</div>
+        <div class="ward-link">Pofadder Ward</div>
+        <div class="ward-link">Aggeneys Ward</div>
+        <div class="ward-link">Pella Ward</div>
+        <div class="muni-perf">
+          <div class="muni-perf-row"><span class="muni-perf-label">Promise Completion</span><span class="muni-perf-val" style="color:var(--c4)">0%</span></div>
+          <div class="muni-bar"><div class="muni-bar-fill" style="width:0%;background:var(--c4)"></div></div>
+          <div class="muni-perf-row" style="margin-top:6px"><span class="muni-perf-label">Accountability Score</span><span class="muni-perf-val" style="color:var(--c4)">28/100</span></div>
+        </div>
+      </div>
+      <div class="muni-card" onclick="showPage('promises',null)">
+        <div class="muni-name">Hantam</div>
+        <div class="muni-label">Active Wards</div>
+        <div class="ward-link">Calvinia Ward</div>
+        <div class="ward-link">Loeriesfontein Ward</div>
+        <div class="ward-link">Brandvlei Ward</div>
+        <div class="muni-perf">
+          <div class="muni-perf-row"><span class="muni-perf-label">Promise Completion</span><span class="muni-perf-val" style="color:var(--c3)">33%</span></div>
+          <div class="muni-bar"><div class="muni-bar-fill" style="width:33%;background:linear-gradient(90deg,var(--c3),var(--c2))"></div></div>
+          <div class="muni-perf-row" style="margin-top:6px"><span class="muni-perf-label">Accountability Score</span><span class="muni-perf-val" style="color:var(--c3)">55/100</span></div>
+        </div>
+      </div>
+      <div class="muni-card" onclick="showPage('promises',null)">
+        <div class="muni-name">Kamiesberg</div>
+        <div class="muni-label">Active Wards</div>
+        <div class="ward-link">Kamieskroon Ward</div>
+        <div class="ward-link">Leliefontein Ward</div>
+        <div class="ward-link">Garies Ward</div>
+        <div class="muni-perf">
+          <div class="muni-perf-row"><span class="muni-perf-label">Promise Completion</span><span class="muni-perf-val" style="color:var(--c2)">67%</span></div>
+          <div class="muni-bar"><div class="muni-bar-fill" style="width:67%;background:linear-gradient(90deg,var(--c1),var(--c2))"></div></div>
+          <div class="muni-perf-row" style="margin-top:6px"><span class="muni-perf-label">Accountability Score</span><span class="muni-perf-val" style="color:var(--c2)">81/100</span></div>
+        </div>
+      </div>
+      <div class="muni-card" onclick="showPage('promises',null)">
+        <div class="muni-name">Richtersveld</div>
+        <div class="muni-label">Active Wards</div>
+        <div class="ward-link">Eksteenfontein Ward</div>
+        <div class="ward-link">Kuboes Ward</div>
+        <div class="ward-link">Port Nolloth Ward</div>
+        <div class="muni-perf">
+          <div class="muni-perf-row"><span class="muni-perf-label">Promise Completion</span><span class="muni-perf-val" style="color:var(--c3)">25%</span></div>
+          <div class="muni-bar"><div class="muni-bar-fill" style="width:25%;background:linear-gradient(90deg,var(--c3),var(--c4))"></div></div>
+          <div class="muni-perf-row" style="margin-top:6px"><span class="muni-perf-label">Accountability Score</span><span class="muni-perf-val" style="color:var(--c3)">44/100</span></div>
+        </div>
+      </div>
+      <div class="muni-card" onclick="showPage('promises',null)">
+        <div class="muni-name">Karoo Hoogland</div>
+        <div class="muni-label">Active Wards</div>
+        <div class="ward-link">Williston Ward</div>
+        <div class="ward-link">Fraserburg Ward</div>
+        <div class="ward-link">Sutherland Ward</div>
+        <div class="muni-perf">
+          <div class="muni-perf-row"><span class="muni-perf-label">Promise Completion</span><span class="muni-perf-val" style="color:var(--c2)">75%</span></div>
+          <div class="muni-bar"><div class="muni-bar-fill" style="width:75%;background:linear-gradient(90deg,var(--c2),var(--c1))"></div></div>
+          <div class="muni-perf-row" style="margin-top:6px"><span class="muni-perf-label">Accountability Score</span><span class="muni-perf-val" style="color:var(--c2)">88/100</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROMISES ══ -->
+<div class="page" id="page-promises">
+  <div class="page-head">
+    <h2>All Councillor Promises</h2>
+    <p>Browse and track all commitments made by ward councillors. Filter by IDP priority category.</p>
+  </div>
+  <div class="wrap">
+    <div class="filter-tabs">
+      <div class="ftab on" onclick="filterPromises('all',this)">All</div>
+      <div class="ftab" onclick="filterPromises('water',this)">Basic Service Delivery</div>
+      <div class="ftab" onclick="filterPromises('econ',this)">Local Economic Development</div>
+      <div class="ftab" onclick="filterPromises('infra',this)">Infrastructure Development</div>
+      <div class="ftab" onclick="filterPromises('inst',this)">Institutional Transformation</div>
+      <div class="ftab" onclick="filterPromises('social',this)">Social Development &amp; Safety</div>
+    </div>
+    <div class="promises-grid" id="promisesGrid">
+
+      <!-- PROMISE 1 -->
+      <div class="promise-card pending" data-cat="social">
+        <div class="pc-top">
+          <span class="pc-category">Social Development and Safety</span>
+          <span class="status-badge sb-pending">● Pending</span>
+        </div>
+        <div class="pc-title">Youth Skills Center</div>
+        <div class="pc-meta">
+          <span class="pc-meta-item">🏛 Committed: Mar 2025</span>
+          <span class="pc-meta-item">🎯 Target: Mar 2026</span>
+          <span class="pc-meta-item" style="color:var(--c4);font-weight:600">⚠ 12 months overdue</span>
+        </div>
+        <div class="pc-meta"><span class="pc-meta-item">📍 Nababeep Ward · Nama Khoi</span><span class="tag tag-social">Social</span></div>
+        <div class="pc-budget">
+          <span class="pc-budget-label">Budget</span>
+          <div class="pc-budget-bar"><div class="pc-budget-fill" style="width:0%"></div></div>
+          <span class="pc-budget-val">R0 / R850,000</span>
+        </div>
+        <div class="pc-feedback-head">💬 Community Feedback (0)</div>
+        <div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:8px">No comments yet. Be the first to respond.</div>
+        <textarea class="feedback-input" placeholder="Share your experience with this promise..."></textarea>
+        <button class="post-btn" onclick="postFeedback(this)">Post</button>
+      </div>
+
+      <!-- PROMISE 2 -->
+      <div class="promise-card completed" data-cat="water">
+        <div class="pc-top">
+          <span class="pc-category">Basic Service Delivery</span>
+          <span class="status-badge sb-completed">✓ Completed</span>
+        </div>
+        <div class="pc-title">New Community Hall Lighting</div>
+        <div class="pc-meta">
+          <span class="pc-meta-item">🏛 Committed: Nov 2024</span>
+          <span class="pc-meta-item">🎯 Target: Feb 2025</span>
+        </div>
+        <div class="pc-meta"><span class="pc-meta-item">📍 Okiep Ward · Nama Khoi</span><span class="tag tag-water">Water &amp; Services</span></div>
+        <div class="pc-claim">
+          <div class="pc-claim-label">Councillor Claims</div>
+          <div class="pc-claim-text">Lighting installed and operational as of 28 Feb 2025.</div>
+        </div>
+        <div class="pc-budget">
+          <span class="pc-budget-label">Budget</span>
+          <div class="pc-budget-bar"><div class="pc-budget-fill" style="width:100%"></div></div>
+          <span class="pc-budget-val">R45,000 / R45,000</span>
+        </div>
+        <div class="pc-verified">✅ Independently Verified — Confirmed on-site visit 2 Mar 2025.</div>
+        <div class="pc-feedback-head">💬 Community Feedback (1)</div>
+        <div class="feedback-item">
+          <div class="feedback-av" style="background:rgba(6,182,212,.2);color:var(--c1)">R</div>
+          <div><div class="feedback-meta">Resident A · 3 Mar 2025</div><div class="feedback-body">Lights are on every night now, thank you!</div></div>
+        </div>
+        <textarea class="feedback-input" placeholder="Share your experience with this promise..."></textarea>
+        <button class="post-btn" onclick="postFeedback(this)">Post</button>
+      </div>
+
+      <!-- PROMISE 3 -->
+      <div class="promise-card flagged" data-cat="infra">
+        <div class="pc-top">
+          <span class="pc-category">Infrastructure Development</span>
+          <span class="status-badge sb-flagged">⚠ Flagged</span>
+        </div>
+        <div class="pc-title">Repair Main Road Potholes</div>
+        <div class="pc-meta">
+          <span class="pc-meta-item">🏛 Committed: Jan 2025</span>
+          <span class="pc-meta-item">🎯 Target: Jun 2025</span>
+          <span class="pc-meta-item" style="color:var(--c4);font-weight:600">⚠ 9 months overdue</span>
+        </div>
+        <div class="pc-meta"><span class="pc-meta-item">📍 Pofadder Ward · Khai-Ma</span><span class="tag tag-infra">Infrastructure</span></div>
+        <div class="pc-claim">
+          <div class="pc-claim-label">Councillor Claims</div>
+          <div class="pc-claim-text">Work 80% complete as of Feb 2025.</div>
+        </div>
+        <div class="pc-budget">
+          <span class="pc-budget-label">Budget</span>
+          <div class="pc-budget-bar"><div class="pc-budget-fill" style="width:80%;background:linear-gradient(90deg,var(--c3),var(--c4))"></div></div>
+          <span class="pc-budget-val">R320,000 / R400,000</span>
+        </div>
+        <div class="pc-flagged">
+          <div class="pc-flagged-label">⚠ Discrepancy Flagged</div>
+          <div class="pc-flagged-text">Councillor claimed completion but Data Steward found: Physical inspection on 28 Feb confirms major sections unrepaired. Residents report no recent activity. Section 71 notification triggered.</div>
+        </div>
+        <div class="pc-feedback-head">💬 Community Feedback (2)</div>
+        <div class="feedback-item">
+          <div class="feedback-av" style="background:rgba(168,85,247,.2);color:var(--c5)">C</div>
+          <div><div class="feedback-meta">Community Member · 1 Mar 2025</div><div class="feedback-body">The north side of the road is still terrible.</div></div>
+        </div>
+        <div class="feedback-item">
+          <div class="feedback-av" style="background:rgba(6,182,212,.2);color:var(--c1)">R</div>
+          <div><div class="feedback-meta">Resident B · 2 Mar 2025</div><div class="feedback-body">My car was damaged again last week.</div></div>
+        </div>
+        <textarea class="feedback-input" placeholder="Share your experience with this promise..."></textarea>
+        <button class="post-btn" onclick="postFeedback(this)">Post</button>
+      </div>
+
+      <!-- PROMISE 4 -->
+      <div class="promise-card inprogress" data-cat="water">
+        <div class="pc-top">
+          <span class="pc-category">Basic Service Delivery</span>
+          <span class="status-badge sb-inprogress">● In Progress</span>
+        </div>
+        <div class="pc-title">Water Supply Upgrade — Kuboes</div>
+        <div class="pc-meta">
+          <span class="pc-meta-item">🏛 Committed: Jun 2025</span>
+          <span class="pc-meta-item">🎯 Target: Dec 2025</span>
+          <span class="pc-meta-item" style="color:var(--c3);font-weight:600">3 months remaining</span>
+        </div>
+        <div class="pc-meta"><span class="pc-meta-item">📍 Kuboes Ward · Richtersveld</span><span class="tag tag-water">Water</span></div>
+        <div class="pc-claim">
+          <div class="pc-claim-label">Councillor Claims</div>
+          <div class="pc-claim-text">Borehole drilling commenced. 60% complete as of Feb 2026.</div>
+        </div>
+        <div class="pc-budget">
+          <span class="pc-budget-label">Budget</span>
+          <div class="pc-budget-bar"><div class="pc-budget-fill" style="width:60%"></div></div>
+          <span class="pc-budget-val">R780,000 / R1,300,000</span>
+        </div>
+        <div class="pc-feedback-head">💬 Community Feedback (1)</div>
+        <div class="feedback-item">
+          <div class="feedback-av" style="background:rgba(34,197,94,.2);color:var(--c2)">N</div>
+          <div><div class="feedback-meta">Nama Community · 5 Feb 2026</div><div class="feedback-body">We can see the drilling equipment. Progress is being made.</div></div>
+        </div>
+        <textarea class="feedback-input" placeholder="Share your experience with this promise..."></textarea>
+        <button class="post-btn" onclick="postFeedback(this)">Post</button>
+      </div>
+
+      <!-- PROMISE 5 -->
+      <div class="promise-card inprogress" data-cat="econ">
+        <div class="pc-top">
+          <span class="pc-category">Local Economic Development</span>
+          <span class="status-badge sb-inprogress">● In Progress</span>
+        </div>
+        <div class="pc-title">Small Business Support Hub</div>
+        <div class="pc-meta">
+          <span class="pc-meta-item">🏛 Committed: Aug 2025</span>
+          <span class="pc-meta-item">🎯 Target: Jun 2026</span>
+          <span class="pc-meta-item" style="color:var(--c1);font-weight:600">On track</span>
+        </div>
+        <div class="pc-meta"><span class="pc-meta-item">📍 Garies Ward · Kamiesberg</span><span class="tag tag-econ">Economic</span></div>
+        <div class="pc-claim">
+          <div class="pc-claim-label">Councillor Claims</div>
+          <div class="pc-claim-text">Premises identified. SEDA partnership agreement signed Jan 2026.</div>
+        </div>
+        <div class="pc-budget">
+          <span class="pc-budget-label">Budget</span>
+          <div class="pc-budget-bar"><div class="pc-budget-fill" style="width:35%"></div></div>
+          <span class="pc-budget-val">R175,000 / R500,000</span>
+        </div>
+        <div class="pc-feedback-head">💬 Community Feedback (0)</div>
+        <div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:8px">No comments yet.</div>
+        <textarea class="feedback-input" placeholder="Share your experience with this promise..."></textarea>
+        <button class="post-btn" onclick="postFeedback(this)">Post</button>
+      </div>
+
+      <!-- PROMISE 6 -->
+      <div class="promise-card completed" data-cat="inst">
+        <div class="pc-top">
+          <span class="pc-category">Institutional Transformation</span>
+          <span class="status-badge sb-completed">✓ Completed</span>
+        </div>
+        <div class="pc-title">Ward Committee Digital Reporting</div>
+        <div class="pc-meta">
+          <span class="pc-meta-item">🏛 Committed: Mar 2025</span>
+          <span class="pc-meta-item">🎯 Target: Sep 2025</span>
+        </div>
+        <div class="pc-meta"><span class="pc-meta-item">📍 Calvinia Ward · Hantam</span><span class="tag tag-inst">Institutional</span></div>
+        <div class="pc-claim">
+          <div class="pc-claim-label">Councillor Claims</div>
+          <div class="pc-claim-text">All ward committee members trained and submitting digital reports monthly.</div>
+        </div>
+        <div class="pc-budget">
+          <span class="pc-budget-label">Budget</span>
+          <div class="pc-budget-bar"><div class="pc-budget-fill" style="width:100%"></div></div>
+          <span class="pc-budget-val">R32,000 / R32,000</span>
+        </div>
+        <div class="pc-verified">✅ Independently Verified — Digital reports received for 6 consecutive months.</div>
+        <div class="pc-feedback-head">💬 Community Feedback (1)</div>
+        <div class="feedback-item">
+          <div class="feedback-av" style="background:rgba(34,197,94,.2);color:var(--c2)">W</div>
+          <div><div class="feedback-meta">Ward Member · 12 Oct 2025</div><div class="feedback-body">Finally we can see what is happening in our ward every month.</div></div>
+        </div>
+        <textarea class="feedback-input" placeholder="Share your experience..."></textarea>
+        <button class="post-btn" onclick="postFeedback(this)">Post</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ VERIFICATION ══ -->
+<div class="page" id="page-verification">
+  <div class="page-head">
+    <h2>🔍 Verification Centre</h2>
+    <p>Data Stewards independently verify councillor promise claims. Approve verified deliveries or flag discrepancies with evidence.</p>
+  </div>
+  <div class="wrap">
+    <div class="role-tabs">
+      <div class="rtab on" onclick="setRole('citizen',this)">👤 Citizen</div>
+      <div class="rtab" onclick="setRole('councillor',this)">🏛 Councillor</div>
+      <div class="rtab" onclick="setRole('steward',this)">🔍 Data Steward</div>
+      <div class="rtab" onclick="setRole('admin',this)">⚙ Admin</div>
+    </div>
+    <div id="roleNotice" class="role-notice">⚠ Switch to <strong>Data Steward</strong> or <strong>Admin</strong> role above to access verification actions.</div>
+    <div class="verif-grid">
+      <div class="verif-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+          <div class="verif-title">Youth Skills Center</div>
+          <span class="status-badge sb-pending">⏳ Pending Review</span>
+        </div>
+        <div class="verif-loc">Nababeep Ward · Nama Khoi</div>
+        <div class="verif-claim">
+          <div class="verif-claim-label">No Completion Claim Yet</div>
+          <div class="verif-claim-text" style="color:var(--muted);font-style:italic">Councillor has not submitted a completion claim. Awaiting submission.</div>
+        </div>
+        <div class="verif-note-label">Steward Notes (Read-Only)</div>
+        <textarea class="verif-notes" placeholder="Add verification notes..." readonly></textarea>
+        <div class="evidence-upload">📎 Attach evidence (photo, document)</div>
+        <div class="verif-actions">
+          <button class="vbtn vbtn-approve" onclick="verifyAction(this,'approve')">✓ Verify &amp; Approve</button>
+          <button class="vbtn vbtn-flag" onclick="verifyAction(this,'flag')">⚠ Flag Discrepancy</button>
+        </div>
+      </div>
+      <div class="verif-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+          <div class="verif-title">New Community Hall Lighting</div>
+          <span class="status-badge sb-completed">✅ Verified</span>
+        </div>
+        <div class="verif-loc">Okiep Ward · Nama Khoi</div>
+        <div class="verif-claim">
+          <div class="verif-claim-label">Councillor Claims</div>
+          <div class="verif-claim-text">Lighting installed and operational as of 28 Feb 2025.</div>
+        </div>
+        <div class="verif-note-label">Steward Notes</div>
+        <textarea class="verif-notes" readonly>Confirmed on-site visit 2 Mar 2025. All 8 lights operational. Community confirmed.</textarea>
+        <div class="evidence-upload">📎 View attached photo evidence (2 files)</div>
+      </div>
+      <div class="verif-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+          <div class="verif-title">Repair Main Road Potholes</div>
+          <span class="status-badge sb-flagged">⚠ Flagged</span>
+        </div>
+        <div class="verif-loc">Pofadder Ward · Khai-Ma</div>
+        <div class="verif-claim">
+          <div class="verif-claim-label">Councillor Claims</div>
+          <div class="verif-claim-text">Work 80% complete as of Feb 2025.</div>
+        </div>
+        <div class="verif-note-label">Steward Notes</div>
+        <textarea class="verif-notes" readonly>Physical inspection 28 Feb confirms major sections unrepaired. Residents report no recent activity. Section 71 notification triggered.</textarea>
+        <div class="evidence-upload">📎 View attached evidence (3 photos)</div>
+      </div>
+      <div class="verif-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+          <div class="verif-title">Water Supply Upgrade — Kuboes</div>
+          <span class="status-badge sb-inprogress">● In Progress</span>
+        </div>
+        <div class="verif-loc">Kuboes Ward · Richtersveld</div>
+        <div class="verif-claim">
+          <div class="verif-claim-label">Councillor Claims</div>
+          <div class="verif-claim-text">Borehole drilling commenced. 60% complete as of Feb 2026.</div>
+        </div>
+        <div class="verif-note-label">Steward Notes (Read-Only)</div>
+        <textarea class="verif-notes" placeholder="Add verification notes..."></textarea>
+        <div class="evidence-upload">📎 Attach evidence (photo, document)</div>
+        <div class="verif-actions">
+          <button class="vbtn vbtn-approve" onclick="verifyAction(this,'approve')">✓ Verify &amp; Approve</button>
+          <button class="vbtn vbtn-flag" onclick="verifyAction(this,'flag')">⚠ Flag Discrepancy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LEADERBOARD ══ -->
+<div class="page" id="page-leaderboard">
+  <div class="page-head">
+    <h2>🏆 Councillor Leaderboard</h2>
+    <p>Ranked by promise completion rate, steward-verified delivery, citizen feedback score, and budget accountability.</p>
+  </div>
+  <div class="wrap">
+    <div class="card mb24" style="padding:16px 20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:10px">SCORING METHODOLOGY</div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text)"><span style="width:10px;height:10px;background:var(--c2);border-radius:50%;display:inline-block"></span>40% — Steward-verified delivery</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text)"><span style="width:10px;height:10px;background:var(--c1);border-radius:50%;display:inline-block"></span>30% — Citizen feedback score</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text)"><span style="width:10px;height:10px;background:var(--c3);border-radius:50%;display:inline-block"></span>20% — Budget accountability</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text)"><span style="width:10px;height:10px;background:var(--c5);border-radius:50%;display:inline-block"></span>10% — Timeliness</div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px">ELECTION READINESS:</div>
+        <span style="font-size:12px;color:var(--white);background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.2);padding:3px 10px;border-radius:10px;font-weight:600">A+ Proven delivery with verified record</span>
+        <span style="font-size:12px;color:var(--white);background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);padding:3px 10px;border-radius:10px;font-weight:600">B Partial delivery, some gaps</span>
+        <span style="font-size:12px;color:var(--white);background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);padding:3px 10px;border-radius:10px;font-weight:600">C Overdue or flagged promises</span>
+        <span style="font-size:12px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.05);padding:3px 10px;border-radius:10px">— No data submitted</span>
+      </div>
+    </div>
+
+    <div class="lb-item" onclick="showToast('Viewing Cllr. Sarah Botha — Ward 3')">
+      <div class="lb-rank top">🥇</div>
+      <div class="lb-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">S</div>
+      <div class="lb-info">
+        <div style="display:flex;align-items:center;gap:8px"><div class="lb-name">Cllr. Sarah Botha</div><span class="lb-trend trend-up">↑ +4%</span></div>
+        <div class="lb-ward">Ward 3 · Namakwa</div>
+        <div class="lb-breakdown">
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c2)"></span>Delivery: 95%</div>
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c1)"></span>Citizens: 89%</div>
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c3)"></span>Budget: 92%</div>
+        </div>
+      </div>
+      <div class="lb-bar-wrap">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Completion</div>
+        <div class="lb-bar-track"><div class="lb-bar-fill" style="width:92%;background:linear-gradient(90deg,var(--c3),var(--c2))"></div></div>
+      </div>
+      <div style="text-align:center;padding:0 16px;flex-shrink:0;border-left:1px solid rgba(255,255,255,.06)"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">2026 Election</div><div style="font-size:20px;font-weight:900;color:var(--c2)">A+</div><div style="font-size:9px;color:var(--muted)">Voter ready</div></div>
+      <div class="lb-right"><div class="lb-pct" style="color:var(--c3)">92%</div><div class="lb-pct-label">Score</div></div>
+    </div>
+
+    <div class="lb-item" onclick="showToast('Viewing Cllr. Mike van Wyk — Ward 7')">
+      <div class="lb-rank top">🥈</div>
+      <div class="lb-avatar" style="background:linear-gradient(135deg,#64748b,#94a3b8)">M</div>
+      <div class="lb-info">
+        <div style="display:flex;align-items:center;gap:8px"><div class="lb-name">Cllr. Mike van Wyk</div><span class="lb-trend trend-flat">→ 0%</span></div>
+        <div class="lb-ward">Ward 7 · Namakwa</div>
+        <div class="lb-breakdown">
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c2)"></span>Delivery: 80%</div>
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c1)"></span>Citizens: 88%</div>
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c3)"></span>Budget: 85%</div>
+        </div>
+      </div>
+      <div class="lb-bar-wrap">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Completion</div>
+        <div class="lb-bar-track"><div class="lb-bar-fill" style="width:84%;background:linear-gradient(90deg,var(--text),var(--c1))"></div></div>
+      </div>
+      <div class="lb-right"><div class="lb-pct" style="color:var(--white)">84%</div><div class="lb-pct-label">Score</div></div>
+    </div>
+
+    <div class="lb-item">
+      <div class="lb-rank top">🥉</div>
+      <div class="lb-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)">J</div>
+      <div class="lb-info">
+        <div style="display:flex;align-items:center;gap:8px"><div class="lb-name">Cllr. Johan Adams</div><span class="lb-trend trend-up">↑ +7%</span></div>
+        <div class="lb-ward">Ward 14 · Namakwa</div>
+        <div class="lb-breakdown">
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c2)"></span>Delivery: 72%</div>
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c1)"></span>Citizens: 78%</div>
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c3)"></span>Budget: 76%</div>
+        </div>
+      </div>
+      <div class="lb-bar-wrap">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Completion</div>
+        <div class="lb-bar-track"><div class="lb-bar-fill" style="width:75%;background:linear-gradient(90deg,var(--c3),var(--c2))"></div></div>
+      </div>
+      <div class="lb-right"><div class="lb-pct" style="color:var(--c3)">75%</div><div class="lb-pct-label">Score</div></div>
+    </div>
+
+    <div class="lb-item">
+      <div class="lb-rank">4</div>
+      <div class="lb-avatar" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">L</div>
+      <div class="lb-info">
+        <div style="display:flex;align-items:center;gap:8px"><div class="lb-name">Cllr. Lerato Dlamini</div><span class="lb-trend trend-down">↓ -2%</span></div>
+        <div class="lb-ward">Ward 2 · Namakwa</div>
+        <div class="lb-breakdown">
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c2)"></span>Delivery: 65%</div>
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c1)"></span>Citizens: 70%</div>
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c3)"></span>Budget: 68%</div>
+        </div>
+      </div>
+      <div class="lb-bar-wrap">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Completion</div>
+        <div class="lb-bar-track"><div class="lb-bar-fill" style="width:68%;background:linear-gradient(90deg,var(--c6),var(--c1))"></div></div>
+      </div>
+      <div class="lb-right"><div class="lb-pct" style="color:var(--c6)">68%</div><div class="lb-pct-label">Score</div></div>
+    </div>
+
+    <div class="lb-item">
+      <div class="lb-rank">5</div>
+      <div class="lb-avatar" style="background:linear-gradient(135deg,#22c55e,#16a34a)">P</div>
+      <div class="lb-info">
+        <div style="display:flex;align-items:center;gap:8px"><div class="lb-name">Cllr. Pieter Swart</div><span class="lb-trend trend-flat">→ 0%</span></div>
+        <div class="lb-ward">Ward 11 · Namakwa</div>
+        <div class="lb-breakdown">
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c2)"></span>Delivery: 48%</div>
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c1)"></span>Citizens: 55%</div>
+          <div class="lb-score-item"><span class="lb-score-dot" style="background:var(--c3)"></span>Budget: 57%</div>
+        </div>
+      </div>
+      <div class="lb-bar-wrap">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Completion</div>
+        <div class="lb-bar-track"><div class="lb-bar-fill" style="width:52%;background:linear-gradient(90deg,var(--c2),var(--c1))"></div></div>
+      </div>
+      <div class="lb-right"><div class="lb-pct" style="color:var(--c2)">52%</div><div class="lb-pct-label">Score</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SALGA REPORT ══ -->
+<div class="page" id="page-salga">
+  <div class="page-head">
+    <h2>📊 SALGA Submission Report</h2>
+    <p>Official performance report for submission to the South African Local Government Association.</p>
+  </div>
+  <div class="wrap">
+    <div class="salga-header">
+      <div>
+        <div class="salga-title">Municipal Promise-to-Performance Dashboard — Namakwa District Pilot</div>
+        <div class="salga-sub">Concept &amp; Design: <strong style="color:var(--white)">Genevieve Ruiter</strong> · © 2026 · Submitted to SALGA · Northern Cape Province</div>
+      </div>
+      <button class="print-btn" onclick="window.print()">🖨 Print to PDF</button>
+    </div>
+
+    <!-- SECTION 71 ALERT FOR SALGA -->
+    <div class="s71-alert">
+      <div class="s71-icon">📋</div>
+      <div>
+        <div class="s71-title">MFMA Section 71 — Overdue Promise Notification</div>
+        <div class="s71-text">1 promise (Repair Main Road Potholes · Khai-Ma) is 9 months overdue with a verified Data Steward discrepancy. This notification has been auto-generated for the Municipal Manager per Section 71 of the MFMA. Reference: NDM-S71-2026-001.</div>
+      </div>
+    </div>
+
+    <div class="salga-kpis">
+      <div class="salga-kpi"><div class="salga-kpi-val" style="color:var(--c1)">6</div><div class="salga-kpi-label">Total Promises Tracked</div></div>
+      <div class="salga-kpi"><div class="salga-kpi-val" style="color:var(--c2)">2</div><div class="salga-kpi-label">Completed &amp; Verified</div></div>
+      <div class="salga-kpi"><div class="salga-kpi-val" style="color:var(--c1)">2</div><div class="salga-kpi-label">In Progress</div></div>
+      <div class="salga-kpi"><div class="salga-kpi-val" style="color:var(--c4)">1</div><div class="salga-kpi-label">Flagged Discrepancies</div></div>
+    </div>
+
+    <!-- IDP PROGRESS FOR SALGA -->
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px">IDP Priority Delivery — 2026</div>
+    <div class="idp-tracker mb24">
+      <div class="idp-track-card"><div class="idp-track-name"><span class="tag tag-water">●</span>Basic Service Delivery</div><div class="idp-track-sub" id="salga-sub-water">2 of 4 promises delivered · R45,000 / R1,345,000 spent</div><div class="idp-prog-bar"><div id="salga-fill-water" class="idp-prog-fill" style="width:50%;background:linear-gradient(90deg,var(--c1),var(--c2));transition:width .8s ease"></div></div><div class="idp-prog-meta"><span id="salga-meta-water">50% complete</span><span id="salga-pct-water" style="color:var(--c2);font-weight:700">On Track</span></div></div>
+      <div class="idp-track-card"><div class="idp-track-name"><span class="tag tag-econ">●</span>Local Economic Development</div><div class="idp-track-sub" id="salga-sub-econ">0 of 2 promises delivered · R175,000 / R500,000 spent</div><div class="idp-prog-bar"><div id="salga-fill-econ" class="idp-prog-fill" style="width:25%;background:linear-gradient(90deg,var(--c2),var(--c3));transition:width .8s ease"></div></div><div class="idp-prog-meta"><span id="salga-meta-econ">25% complete</span><span id="salga-pct-econ" style="color:var(--c3);font-weight:700">Monitor</span></div></div>
+      <div class="idp-track-card"><div class="idp-track-name"><span class="tag tag-infra">●</span>Infrastructure Development</div><div class="idp-track-sub" id="salga-sub-infra">0 of 1 promises delivered · R320,000 / R400,000 spent</div><div class="idp-prog-bar"><div id="salga-fill-infra" class="idp-prog-fill" style="width:0%;background:var(--c4);transition:width .8s ease"></div></div><div class="idp-prog-meta"><span id="salga-meta-infra">0% delivered</span><span id="salga-pct-infra" style="color:var(--c4);font-weight:700">⚠ Flagged</span></div></div>
+      <div class="idp-track-card"><div class="idp-track-name"><span class="tag tag-inst">●</span>Institutional Transformation</div><div class="idp-track-sub" id="salga-sub-inst">1 of 1 promises delivered · R32,000 / R32,000 spent</div><div class="idp-prog-bar"><div id="salga-fill-inst" class="idp-prog-fill" style="width:100%;background:linear-gradient(90deg,var(--c5),var(--c2));transition:width .8s ease"></div></div><div class="idp-prog-meta"><span id="salga-meta-inst">100% complete</span><span id="salga-pct-inst" style="color:var(--c2);font-weight:700">✓ Done</span></div></div>
+    </div>
+
+    <!-- DISTRICT PERFORMANCE SUMMARY -->
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px">District Performance Summary</div>
+    <table class="dp-table mb24">
+      <thead>
+        <tr>
+          <th>Municipality</th>
+          <th>Promises</th>
+          <th>Verified</th>
+          <th>Flagged</th>
+          <th>Accountability Score</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong style="color:var(--white)">Nama Khoi</strong></td><td>2</td><td style="color:var(--c2)">1 verified</td><td>0</td><td><span style="color:var(--c3);font-weight:700">72/100</span></td><td><span class="status-badge sb-inprogress">50%</span></td></tr>
+        <tr><td><strong style="color:var(--white)">Khai-Ma</strong></td><td>1</td><td>0</td><td style="color:var(--c4)">1 flagged</td><td><span style="color:var(--c4);font-weight:700">28/100</span></td><td><span class="status-badge sb-flagged">0%</span></td></tr>
+        <tr><td><strong style="color:var(--white)">Kamiesberg</strong></td><td>2</td><td style="color:var(--c2)">1 verified</td><td>0</td><td><span style="color:var(--c2);font-weight:700">81/100</span></td><td><span class="status-badge sb-completed">67%</span></td></tr>
+        <tr><td><strong style="color:var(--white)">Hantam</strong></td><td>1</td><td style="color:var(--c2)">1 verified</td><td>0</td><td><span style="color:var(--c2);font-weight:700">88/100</span></td><td><span class="status-badge sb-completed">100%</span></td></tr>
+        <tr><td><strong style="color:var(--white)">Richtersveld</strong></td><td>1</td><td>0</td><td>0</td><td><span style="color:var(--c3);font-weight:700">44/100</span></td><td><span class="status-badge sb-inprogress">25%</span></td></tr>
+        <tr><td><strong style="color:var(--white)">Karoo Hoogland</strong></td><td>0</td><td>0</td><td>0</td><td><span style="color:var(--muted);font-weight:700">—</span></td><td><span class="status-badge" style="background:rgba(255,255,255,.06);color:var(--muted)">Onboarding</span></td></tr>
+      </tbody>
+    </table>
+
+
+    <!-- WHITE PAPER ALIGNMENT -->
+    <details style="background:var(--card);border:1px solid rgba(6,182,212,.25);border-radius:14px;margin-bottom:24px;overflow:hidden">
+      <summary style="padding:18px 24px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:15px;font-weight:700;color:var(--white);list-style:none;user-select:none">
+        <span style="font-size:20px">📜</span>
+        White Paper on Local Government Review — Clause Alignment
+        <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--c1);background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);padding:3px 10px;border-radius:10px">8 clauses addressed</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">▼ expand</span>
+      </summary>
+      <div style="padding:0 24px 24px">
+        <div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:18px;padding:14px;background:rgba(6,182,212,.04);border-radius:8px;border-left:2px solid var(--c1)">
+          SALGA is currently reviewing the 1998 White Paper on Local Government — the most significant policy rewrite since democracy. The Municipal P2P Dashboard directly addresses 8 of the priority reform clauses. This positions the system as a <strong style="color:var(--white)">policy implementation tool, not just a technology product.</strong>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 16px;background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.12);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px">Chapter 4 — Community Participation in Local Government</div><div style="font-size:12px;color:var(--text)">"Municipalities must develop mechanisms for communities to participate in the affairs of the municipality." The Data Steward verification model and citizen feedback on every promise directly fulfils this obligation.</div></div>
+            <span style="background:rgba(34,197,94,.12);color:var(--c2);border:1px solid rgba(34,197,94,.2);font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;white-space:nowrap;font-family:'JetBrains Mono',monospace">✓ FULFILLED</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 16px;background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.12);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px">Chapter 5 — Ward Committees and Councillor Accountability</div><div style="font-size:12px;color:var(--text)">"Ward councillors must be accountable to their communities for the commitments they make." The leaderboard, promise tracking and discrepancy flagging creates this accountability infrastructure for the first time.</div></div>
+            <span style="background:rgba(34,197,94,.12);color:var(--c2);border:1px solid rgba(34,197,94,.2);font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;white-space:nowrap;font-family:'JetBrains Mono',monospace">✓ FULFILLED</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 16px;background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.12);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px">Chapter 6 — IDP as a Living Document</div><div style="font-size:12px;color:var(--text)">"The IDP must be implemented through measurable, time-bound commitments at ward level." All promises in this system are tagged to IDP priority areas with deadlines and budget tracking.</div></div>
+            <span style="background:rgba(34,197,94,.12);color:var(--c2);border:1px solid rgba(34,197,94,.2);font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;white-space:nowrap;font-family:'JetBrains Mono',monospace">✓ FULFILLED</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 16px;background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.12);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px">Chapter 8 — Performance Management Systems</div><div style="font-size:12px;color:var(--text)">"Municipalities must develop performance management systems that track service delivery at ward level." The accountability score and IDP progress tracker constitute exactly this system.</div></div>
+            <span style="background:rgba(34,197,94,.12);color:var(--c2);border:1px solid rgba(34,197,94,.2);font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;white-space:nowrap;font-family:'JetBrains Mono',monospace">✓ FULFILLED</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 16px;background:rgba(6,182,212,.04);border:1px solid rgba(6,182,212,.12);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px">Chapter 9 — Financial Management and MFMA Compliance</div><div style="font-size:12px;color:var(--text)">"Budget spending must be traceable to service delivery outcomes at ward level." The budget tracking per promise and Section 71 auto-alerts create this traceability.</div></div>
+            <span style="background:rgba(6,182,212,.1);color:var(--c1);border:1px solid rgba(6,182,212,.2);font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;white-space:nowrap;font-family:'JetBrains Mono',monospace">✓ FULFILLED</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 16px;background:rgba(6,182,212,.04);border:1px solid rgba(6,182,212,.12);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px">Chapter 11 — Digital Governance and E-Participation</div><div style="font-size:12px;color:var(--text)">"Municipalities should leverage technology to improve citizen engagement and transparency." This dashboard works on any device, offline in rural dead zones, requiring no app installation.</div></div>
+            <span style="background:rgba(6,182,212,.1);color:var(--c1);border:1px solid rgba(6,182,212,.2);font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;white-space:nowrap;font-family:'JetBrains Mono',monospace">✓ FULFILLED</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 16px;background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.12);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px">Chapter 3 — Rural Municipality Differentiation</div><div style="font-size:12px;color:var(--text)">"Rural municipalities face unique connectivity and capacity constraints that must be addressed in governance systems." The Data Steward model and satellite-linked offline operation is built specifically for rural dead zones like Kuboes and Nourivier.</div></div>
+            <span style="background:rgba(245,158,11,.1);color:var(--c3);border:1px solid rgba(245,158,11,.2);font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;white-space:nowrap;font-family:'JetBrains Mono',monospace">✓ FULFILLED</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 16px;background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.12);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px">Chapter 7 — Intergovernmental Relations</div><div style="font-size:12px;color:var(--text)">"District municipalities must coordinate service delivery accountability across local municipalities." The cross-municipality comparison and district-level reporting enables this coordination for SALGA, COGTA and provincial government.</div></div>
+            <span style="background:rgba(245,158,11,.1);color:var(--c3);border:1px solid rgba(245,158,11,.2);font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;white-space:nowrap;font-family:'JetBrains Mono',monospace">✓ FULFILLED</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- DEPLOY TOOLKIT -->
+    <div style="background:linear-gradient(135deg,rgba(6,182,212,.08),rgba(168,85,247,.06));border:1px solid rgba(6,182,212,.2);border-radius:14px;padding:24px 28px;margin-bottom:24px">
+      <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+        <div style="font-size:32px;flex-shrink:0">🚀</div>
+        <div style="flex:1;min-width:200px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--c1);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">For SALGA — National Replication</div>
+          <div style="font-size:17px;font-weight:700;color:var(--white);margin-bottom:8px">Any municipality in South Africa can run this. Here is what it requires.</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px">
+            <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:14px;text-align:center"><div style="font-size:22px;margin-bottom:6px">📱</div><div style="font-size:12px;font-weight:700;color:var(--white);margin-bottom:3px">WhatsApp</div><div style="font-size:11px;color:var(--muted)">Citizens submit feedback via WhatsApp — no app needed</div></div>
+            <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:14px;text-align:center"><div style="font-size:22px;margin-bottom:6px">📊</div><div style="font-size:12px;font-weight:700;color:var(--white);margin-bottom:3px">Google Sheets</div><div style="font-size:11px;color:var(--muted)">Councillor promises entered in a shared spreadsheet</div></div>
+            <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:14px;text-align:center"><div style="font-size:22px;margin-bottom:6px">👤</div><div style="font-size:12px;font-weight:700;color:var(--white);margin-bottom:3px">1 Data Steward</div><div style="font-size:11px;color:var(--muted)">Per ward — community member trained in one day</div></div>
+            <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:14px;text-align:center"><div style="font-size:22px;margin-bottom:6px">🌐</div><div style="font-size:12px;font-weight:700;color:var(--white);margin-bottom:3px">GitHub Pages</div><div style="font-size:11px;color:var(--muted)">Free hosting — works offline in dead zones</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CROSS-MUNICIPALITY COMPARISON -->
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px">Why SALGA Should Adopt This Nationally</div>
+    <table class="comp-table mb24">
+      <thead>
+        <tr>
+          <th>Municipality</th>
+          <th>System Used</th>
+          <th>IDP-Linked</th>
+          <th>Citizen Verification</th>
+          <th>Budget Tracking</th>
+          <th>SALGA-Ready Report</th>
+          <th>Accountability Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:rgba(6,182,212,.04)">
+          <td><span class="comp-name highlight">Namakwa District ★</span><div style="font-size:10px;color:var(--c1);font-family:'JetBrains Mono',monospace">THIS SYSTEM</div></td>
+          <td><span class="comp-badge" style="background:rgba(34,197,94,.12);color:var(--c2)">P2P Dashboard</span></td>
+          <td style="color:var(--c2)">✓ Yes</td>
+          <td style="color:var(--c2)">✓ Data Stewards</td>
+          <td style="color:var(--c2)">✓ Per Promise</td>
+          <td style="color:var(--c2)">✓ One Click</td>
+          <td><div class="comp-bar-cell"><div class="comp-bar"><div class="comp-bar-fill" style="width:75%;background:linear-gradient(90deg,var(--c1),var(--c2))"></div></div><span style="font-size:12px;font-weight:700;color:var(--c2)">75/100</span></div></td>
+        </tr>
+        <tr>
+          <td><span class="comp-name">City of Cape Town</span></td>
+          <td><span class="comp-badge" style="background:rgba(255,255,255,.06);color:var(--muted)">Annual Reports</span></td>
+          <td style="color:var(--muted)">Partial</td>
+          <td style="color:var(--c4)">✗ None</td>
+          <td style="color:var(--c3)">Aggregate only</td>
+          <td style="color:var(--c4)">✗ Manual</td>
+          <td><div class="comp-bar-cell"><div class="comp-bar"><div class="comp-bar-fill" style="width:55%;background:var(--c3)"></div></div><span style="font-size:12px;font-weight:700;color:var(--c3)">55/100</span></div></td>
+        </tr>
+        <tr>
+          <td><span class="comp-name">Ekurhuleni Metro</span></td>
+          <td><span class="comp-badge" style="background:rgba(255,255,255,.06);color:var(--muted)">SAP System</span></td>
+          <td style="color:var(--c4)">✗ No</td>
+          <td style="color:var(--c4)">✗ None</td>
+          <td style="color:var(--c2)">✓ ERP-linked</td>
+          <td style="color:var(--c4)">✗ Manual</td>
+          <td><div class="comp-bar-cell"><div class="comp-bar"><div class="comp-bar-fill" style="width:40%;background:var(--c3)"></div></div><span style="font-size:12px;font-weight:700;color:var(--c3)">40/100</span></div></td>
+        </tr>
+        <tr>
+          <td><span class="comp-name">Buffalo City Metro</span></td>
+          <td><span class="comp-badge" style="background:rgba(255,255,255,.06);color:var(--muted)">Spreadsheets</span></td>
+          <td style="color:var(--c4)">✗ No</td>
+          <td style="color:var(--c4)">✗ None</td>
+          <td style="color:var(--c4)">✗ None</td>
+          <td style="color:var(--c4)">✗ Manual</td>
+          <td><div class="comp-bar-cell"><div class="comp-bar"><div class="comp-bar-fill" style="width:18%;background:var(--c4)"></div></div><span style="font-size:12px;font-weight:700;color:var(--c4)">18/100</span></div></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="card" style="border-left:3px solid var(--c1);margin-bottom:0">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--c1);letter-spacing:2px;margin-bottom:10px">THE SALGA PITCH — ONE SENTENCE</div>
+      <div style="font-size:17px;color:var(--white);line-height:1.8;font-weight:500">This is the first system in South Africa that closes the loop between <strong style="color:var(--c1)">what a councillor promised on election day</strong>, <strong style="color:var(--c2)">what they actually delivered</strong>, <strong style="color:var(--c3)">what a citizen independently confirmed</strong>, and <strong style="color:var(--c1)">what it cost</strong> — all tied to IDP priorities, Section 71 compliant, and exportable to SALGA in one click. <span style="color:var(--muted)">No other municipality in South Africa has this.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AG COMPLIANCE ══ -->
+<div class="page" id="page-ag">
+  <div class="page-head">
+    <h2>📑 AG Compliance Tracker</h2>
+    <p>Which councillor promises align with — or contradict — the Auditor-General's audit findings for Namakwa District.</p>
+  </div>
+  <div class="wrap">
+
+    <!-- AG CONTEXT BANNER -->
+    <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.18);border-radius:14px;padding:20px 24px;margin-bottom:28px;display:flex;gap:16px;align-items:flex-start">
+      <div style="font-size:28px;flex-shrink:0">🔍</div>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#f0f6ff;margin-bottom:5px">86% of municipalities received material compliance findings — the worst rate in years.</div>
+        <div style="font-size:13px;color:#94a3b8;line-height:1.7">The AG flags failures in service delivery, financial management and governance. This tracker shows where councillor promises directly address — or ignore — those findings. <strong style="color:#f0f6ff">When a promise addresses an audit finding, it should be prioritised. When a councillor claims completion but the AG still flags the same issue, that is a discrepancy.</strong></div>
+      </div>
+    </div>
+
+    <!-- AG SUMMARY STRIP -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px">
+      <div class="card" style="text-align:center"><div style="font-size:32px;font-weight:900;color:var(--c4);line-height:1;margin-bottom:5px">12</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">AG Findings (2025)</div></div>
+      <div class="card" style="text-align:center"><div style="font-size:32px;font-weight:900;color:var(--c2);line-height:1;margin-bottom:5px">4</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Promises Address Finding</div></div>
+      <div class="card" style="text-align:center"><div style="font-size:32px;font-weight:900;color:var(--c3);line-height:1;margin-bottom:5px">1</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Contradicts AG Finding</div></div>
+      <div class="card" style="text-align:center"><div style="font-size:32px;font-weight:900;color:var(--muted);line-height:1;margin-bottom:5px">7</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Findings Not Addressed</div></div>
+    </div>
+
+    <!-- AG FINDINGS TABLE -->
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px">AG Findings vs Councillor Promises — Namakwa District 2025 Audit</div>
+    <div style="overflow-x:auto;margin-bottom:28px">
+      <table style="width:100%;border-collapse:collapse;background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--border)">
+        <thead>
+          <tr>
+            <th style="background:rgba(255,255,255,.04);padding:12px 16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--border)">AG Finding</th>
+            <th style="background:rgba(255,255,255,.04);padding:12px 16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--border)">IDP Area</th>
+            <th style="background:rgba(255,255,255,.04);padding:12px 16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--border)">Related Promise</th>
+            <th style="background:rgba(255,255,255,.04);padding:12px 16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--border)">Alignment</th>
+            <th style="background:rgba(255,255,255,.04);padding:12px 16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--border)">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:14px 16px"><div style="font-size:13px;font-weight:700;color:#f0f6ff;margin-bottom:2px">Water service delivery failures in 3 wards</div><div style="font-size:11px;color:#64748b;font-style:italic">Material finding — 3rd consecutive year</div></td>
+            <td style="padding:14px 16px"><span class="tag tag-water">Basic Services</span></td>
+            <td style="padding:14px 16px;font-size:13px;color:#94a3b8">Water Supply Upgrade — Kuboes<br><span style="font-size:11px;color:#475569">Cllr. Dlamini · Richtersveld</span></td>
+            <td style="padding:14px 16px"><span style="background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.2);font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;font-family:'JetBrains Mono',monospace">✓ ADDRESSES</span></td>
+            <td style="padding:14px 16px"><span class="status-badge sb-inprogress">In Progress</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:14px 16px"><div style="font-size:13px;font-weight:700;color:#f0f6ff;margin-bottom:2px">Infrastructure maintenance backlog</div><div style="font-size:11px;color:#64748b;font-style:italic">Roads and stormwater — significant finding</div></td>
+            <td style="padding:14px 16px"><span class="tag tag-infra">Infrastructure</span></td>
+            <td style="padding:14px 16px;font-size:13px;color:#94a3b8">Repair Main Road Potholes<br><span style="font-size:11px;color:#475569">Cllr. Swart · Khai-Ma</span></td>
+            <td style="padding:14px 16px"><span style="background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;font-family:'JetBrains Mono',monospace">⚠ CONTRADICTS</span></td>
+            <td style="padding:14px 16px"><span class="status-badge sb-flagged">Flagged — Councillor claimed 80% complete but AG finding still active. Data Steward confirmed roads unrepaired.</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:14px 16px"><div style="font-size:13px;font-weight:700;color:#f0f6ff;margin-bottom:2px">Ward committee reporting non-compliance</div><div style="font-size:11px;color:#64748b;font-style:italic">No monthly reports submitted in 4 wards</div></td>
+            <td style="padding:14px 16px"><span class="tag tag-inst">Institutional</span></td>
+            <td style="padding:14px 16px;font-size:13px;color:#94a3b8">Ward Committee Digital Reporting<br><span style="font-size:11px;color:#475569">Cllr. Adams · Hantam</span></td>
+            <td style="padding:14px 16px"><span style="background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.2);font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;font-family:'JetBrains Mono',monospace">✓ ADDRESSES</span></td>
+            <td style="padding:14px 16px"><span class="status-badge sb-completed">✓ Verified — 6 months consecutive reports</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:14px 16px"><div style="font-size:13px;font-weight:700;color:#f0f6ff;margin-bottom:2px">Community lighting and safety infrastructure</div><div style="font-size:11px;color:#64748b;font-style:italic">Public lighting failures in Okiep area</div></td>
+            <td style="padding:14px 16px"><span class="tag tag-social">Social Safety</span></td>
+            <td style="padding:14px 16px;font-size:13px;color:#94a3b8">New Community Hall Lighting<br><span style="font-size:11px;color:#475569">Cllr. Botha · Nama Khoi</span></td>
+            <td style="padding:14px 16px"><span style="background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.2);font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;font-family:'JetBrains Mono',monospace">✓ ADDRESSES</span></td>
+            <td style="padding:14px 16px"><span class="status-badge sb-completed">✓ Verified on-site</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:14px 16px"><div style="font-size:13px;font-weight:700;color:#f0f6ff;margin-bottom:2px">Youth unemployment — no municipal response</div><div style="font-size:11px;color:#64748b;font-style:italic">Economic development performance indicator unmet</div></td>
+            <td style="padding:14px 16px"><span class="tag tag-social">Social Dev</span></td>
+            <td style="padding:14px 16px;font-size:13px;color:#94a3b8">Youth Skills Center<br><span style="font-size:11px;color:#475569">Nababeep Ward · Nama Khoi</span></td>
+            <td style="padding:14px 16px"><span style="background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.2);font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;font-family:'JetBrains Mono',monospace">✓ ADDRESSES</span></td>
+            <td style="padding:14px 16px"><span class="status-badge sb-pending">Pending — 12 months overdue. AG finding remains open.</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:14px 16px"><div style="font-size:13px;font-weight:700;color:#f0f6ff;margin-bottom:2px">Consumer debt collection failures</div><div style="font-size:11px;color:#64748b;font-style:italic">Revenue management — irregular expenditure</div></td>
+            <td style="padding:14px 16px"><span class="tag tag-inst">Financial</span></td>
+            <td style="padding:14px 16px;font-size:13px;color:var(--c4);font-style:italic">No promise submitted addressing this finding</td>
+            <td style="padding:14px 16px"><span style="background:rgba(255,255,255,.06);color:var(--muted);font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;font-family:'JetBrains Mono',monospace">— NOT ADDRESSED</span></td>
+            <td style="padding:14px 16px"><span style="font-size:12px;color:var(--muted)">No promise submitted. R12.4M debt outstanding.</span></td>
+          </tr>
+          <tr>
+            <td style="padding:14px 16px"><div style="font-size:13px;font-weight:700;color:#f0f6ff;margin-bottom:2px">Supply chain management irregularities</div><div style="font-size:11px;color:#64748b;font-style:italic">Procurement non-compliance — 6 wards</div></td>
+            <td style="padding:14px 16px"><span class="tag tag-inst">Institutional</span></td>
+            <td style="padding:14px 16px;font-size:13px;color:var(--c4);font-style:italic">No promise submitted addressing this finding</td>
+            <td style="padding:14px 16px"><span style="background:rgba(255,255,255,.06);color:var(--muted);font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;font-family:'JetBrains Mono',monospace">— NOT ADDRESSED</span></td>
+            <td style="padding:14px 16px"><span style="font-size:12px;color:var(--muted)">AG finding open. No ward-level commitment made.</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- WHAT THIS MEANS FOR SALGA -->
+    <div class="card" style="border-left:3px solid var(--c1)">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--c1);letter-spacing:2px;margin-bottom:12px">WHY THIS MATTERS FOR SALGA</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#f0f6ff;margin-bottom:6px">For SALGA to present to the AG Office</div>
+          <div style="font-size:13px;color:#94a3b8;line-height:1.7">This is the first system that shows whether councillor promises are actually responding to audit findings — or ignoring them. SALGA can use this to demonstrate to the AG that municipalities are taking findings seriously at ward level, not just at CFO level.</div>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#f0f6ff;margin-bottom:6px">For the National Treasury</div>
+          <div style="font-size:13px;color:#94a3b8;line-height:1.7">The contradictions column is the most powerful feature — it shows in real time when a councillor claims delivery but the AG finding remains open. This is exactly the accountability gap Treasury has been trying to close for a decade.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ DIGITAL ARCHIVE ══ -->
+<div class="page" id="page-archive">
+  <div class="page-head">
+    <h2>🗄 Civic Digital Archive</h2>
+    <p>South Africa's first searchable civic memory — every promise, speech, document and public appearance, permanently on record. Nothing forgotten. Nothing lost.</p>
+  </div>
+  <div class="wrap">
+
+    <!-- STATS STRIP -->
+    <div class="arc-stats" id="arcStats">
+      <div class="arc-stat"><div class="arc-stat-val" style="color:var(--c1)" id="arc-count-all">7</div><div class="arc-stat-lbl">Total Records</div></div>
+      <div class="arc-stat"><div class="arc-stat-val" style="color:var(--c3)" id="arc-count-promise">2</div><div class="arc-stat-lbl">Promises</div></div>
+      <div class="arc-stat"><div class="arc-stat-val" style="color:var(--c2)" id="arc-count-speech">2</div><div class="arc-stat-lbl">Speeches</div></div>
+      <div class="arc-stat"><div class="arc-stat-val" style="color:var(--c5)" id="arc-count-document">1</div><div class="arc-stat-lbl">Documents</div></div>
+      <div class="arc-stat"><div class="arc-stat-val" style="color:var(--c4)" id="arc-count-media">1</div><div class="arc-stat-lbl">Media</div></div>
+      <div class="arc-stat"><div class="arc-stat-val" style="color:var(--c6)" id="arc-count-appearance">1</div><div class="arc-stat-lbl">Appearances</div></div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="arc-search">
+      <input class="arc-search-input" id="arcSearchInput" type="text" placeholder="Search by councillor name, ward, promise, keyword..." oninput="arcSearch()">
+      <button class="arc-search-btn" onclick="arcSearch()">🔍 Search</button>
+      <button class="arc-search-btn" style="background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border)" onclick="arcClearSearch()">✕ Clear</button>
+    </div>
+
+    <!-- CATEGORY FILTER -->
+    <div class="arc-cats">
+      <div class="arc-cat on" onclick="arcFilter('all',this)">📁 All Records</div>
+      <div class="arc-cat" onclick="arcFilter('promise',this)">📜 Promises &amp; Commitments</div>
+      <div class="arc-cat" onclick="arcFilter('speech',this)">🎤 Speeches &amp; Addresses</div>
+      <div class="arc-cat" onclick="arcFilter('appearance',this)">📅 Public Appearances</div>
+      <div class="arc-cat" onclick="arcFilter('document',this)">📄 Official Documents</div>
+      <div class="arc-cat" onclick="arcFilter('media',this)">📸 Media &amp; Evidence</div>
+      <div class="arc-cat" onclick="arcFilter('outcome',this)">⚖️ Outcome Records</div>
+    </div>
+
+    <!-- UPLOAD BOX -->
+    <div class="arc-upload-box">
+      <div class="arc-upload-title">➕ Add to Archive</div>
+      <div class="arc-upload-sub">Upload a document, paste a Google Drive link, or record a public appearance. Every record is tagged with a Promise Fingerprint — who, when, where, which IDP priority, and whether it was delivered.</div>
+      <div class="arc-form">
+        <div>
+          <div class="arc-label">Record Title</div>
+          <input class="arc-input" id="arcTitle" type="text" placeholder="e.g. Water Supply Promise — Kuboes Community Meeting">
+        </div>
+        <div>
+          <div class="arc-label">Councillor / Speaker</div>
+          <input class="arc-input" id="arcCouncillor" type="text" placeholder="e.g. Cllr. Sarah Botha">
+        </div>
+        <div>
+          <div class="arc-label">Ward</div>
+          <select class="arc-select" id="arcWard">
+            <option value="">Select ward...</option>
+            <option>Okiep Ward · Nama Khoi</option>
+            <option>Nababeep Ward · Nama Khoi</option>
+            <option>Steinkopf Ward · Nama Khoi</option>
+            <option>Pofadder Ward · Khai-Ma</option>
+            <option>Aggeneys Ward · Khai-Ma</option>
+            <option>Kuboes Ward · Richtersveld</option>
+            <option>Port Nolloth Ward · Richtersveld</option>
+            <option>Kamieskroon Ward · Kamiesberg</option>
+            <option>Calvinia Ward · Hantam</option>
+            <option>Williston Ward · Karoo Hoogland</option>
+            <option>District-Wide</option>
+          </select>
+        </div>
+        <div>
+          <div class="arc-label">Record Type</div>
+          <select class="arc-select" id="arcType">
+            <option value="promise">📜 Promise / Commitment</option>
+            <option value="speech">🎤 Speech / Address</option>
+            <option value="appearance">📅 Public Appearance</option>
+            <option value="document">📄 Official Document</option>
+            <option value="media">📸 Media / Evidence</option>
+            <option value="outcome">⚖️ Outcome Record</option>
+          </select>
+        </div>
+        <div>
+          <div class="arc-label">IDP Priority</div>
+          <select class="arc-select" id="arcIDP">
+            <option value="water">Basic Service Delivery</option>
+            <option value="econ">Local Economic Development</option>
+            <option value="infra">Infrastructure Development</option>
+            <option value="inst">Institutional Transformation</option>
+            <option value="social">Social Development &amp; Safety</option>
+          </select>
+        </div>
+        <div>
+          <div class="arc-label">Date</div>
+          <input class="arc-input" id="arcDate" type="date">
+        </div>
+        <div class="arc-form-full">
+          <div class="arc-label">Description / Notes</div>
+          <textarea class="arc-input" id="arcDesc" rows="2" placeholder="What was promised, said or committed to? Include direct quotes if available."></textarea>
+        </div>
+        <div class="arc-form-full arc-file-zone">
+          <div>
+            <div class="arc-label">Upload File</div>
+            <label class="arc-file-btn">
+              📎 Choose file (PDF, image, doc)
+              <input type="file" id="arcFile" style="display:none" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp4,.mp3" onchange="arcFileSelected(this)">
+            </label>
+            <div id="arcFileName" style="font-size:11px;color:var(--muted);margin-top:5px;font-family:'JetBrains Mono',monospace"></div>
+          </div>
+          <div style="flex:1;min-width:220px">
+            <div class="arc-label">OR paste Google Drive / YouTube link</div>
+            <input class="arc-drive-input" id="arcDriveLink" type="text" placeholder="https://drive.google.com/... or https://youtu.be/...">
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="arc-submit" onclick="arcAddRecord()">+ Add to Archive</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARCHIVE LIST -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase" id="arcResultCount">Showing 7 records</div>
+      <div style="display:flex;gap:8px">
+        <select class="arc-select" style="width:auto;padding:7px 12px;font-size:12px" onchange="arcSort(this.value)">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="az">A → Z</option>
+          <option value="type">By type</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="arc-items" id="arcList"></div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-text">Namakwa District Municipality · Smart Infrastructure Initiative</div>
+  <div class="footer-pills">
+    <span class="footer-pill">Springbok</span>
+    <span class="footer-pill">Kuboes</span>
+    <span class="footer-pill">Nourivier</span>
+    <span class="footer-pill">Pofadder</span>
+    <span class="footer-pill">Calvinia</span>
+  </div>
+  <div class="footer-text">© 2026 Genevieve Ruiter · All rights reserved.</div>
+</footer>
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.25);border-radius:10px;padding:11px 22px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--c1);z-index:9999;transition:transform .3s;pointer-events:none;letter-spacing:1px"></div>
+
+<script>
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+  document.querySelectorAll('.nav-link').forEach(function(b){ b.classList.remove('on'); });
+  var pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('on');
+  if (el) el.classList.add('on');
+  else {
+    document.querySelectorAll('.nav-link').forEach(function(b){
+      var oc = b.getAttribute('onclick') || '';
+      if (oc.indexOf("'" + id + "'") !== -1) b.classList.add('on');
+    });
+  }
+  window.scrollTo(0, 0);
+}
+
+function setRole(role, el) {
+  document.querySelectorAll('.role-btn, .rtab').forEach(function(b){ b.classList.remove('on'); });
+  if (el) el.classList.add('on');
+  var notice = document.getElementById('roleNotice');
+  if (notice) {
+    if (role === 'steward' || role === 'admin') {
+      notice.style.display = 'none';
+      document.querySelectorAll('.verif-notes[readonly]').forEach(function(n){
+        if (!n.value) n.removeAttribute('readonly');
+      });
+    } else {
+      notice.style.display = 'flex';
+    }
+  }
+  showToast('Viewing as: ' + role.charAt(0).toUpperCase() + role.slice(1));
+}
+
+function filterPromises(cat, el) {
+  document.querySelectorAll('.ftab').forEach(function(t){ t.classList.remove('on'); });
+  if (el) el.classList.add('on');
+  document.querySelectorAll('.promise-card').forEach(function(c){
+    if (cat === 'all' || c.getAttribute('data-cat') === cat) {
+      c.style.display = '';
+    } else {
+      c.style.display = 'none';
+    }
+  });
+}
+
+function filterIDP(cat, el) {
+  document.querySelectorAll('.idp-pill').forEach(function(p){ p.classList.remove('on'); p.style.background=''; p.style.color=''; p.style.borderColor=''; });
+  if (el) {
+    el.classList.add('on');
+    el.style.background = 'var(--c1)';
+    el.style.color = '#000';
+    el.style.borderColor = 'var(--c1)';
+  }
+  showPage('promises', null);
+  setTimeout(function(){ filterPromises(cat, null); }, 50);
+}
+
+function postFeedback(btn) {
+  var card = btn.closest('.promise-card');
+  var input = card.querySelector('.feedback-input');
+  var text = input.value.trim();
+  if (!text) return;
+  var headEl = card.querySelector('.pc-feedback-head');
+  var match = headEl.textContent.match(/\((\d+)\)/);
+  var count = match ? parseInt(match[1]) + 1 : 1;
+  headEl.textContent = '💬 Community Feedback (' + count + ')';
+  var div = document.createElement('div');
+  div.className = 'feedback-item';
+  div.innerHTML = '<div class="feedback-av" style="background:rgba(6,182,212,.2);color:var(--c1)">Y</div><div><div class="feedback-meta">You · just now</div><div class="feedback-body">' + text + '</div></div>';
+  input.parentNode.insertBefore(div, input);
+  input.value = '';
+  showToast('Feedback posted');
+}
+
+function verifyAction(btn, action) {
+  var card = btn.closest('.verif-card');
+  var badge = card.querySelector('.status-badge');
+  if (action === 'approve') {
+    badge.className = 'status-badge sb-completed';
+    badge.textContent = '✅ Verified';
+    card.querySelector('.verif-actions').remove();
+    calcIDP();
+    showToast('Promise verified and approved');
+  } else {
+    badge.className = 'status-badge sb-flagged';
+    badge.textContent = '⚠ Flagged';
+    calcIDP();
+    showToast('Discrepancy flagged — Section 71 notification queued');
+  }
+}
+
+// ══════════════════════════════════════════════════
+// CIVIC DIGITAL ARCHIVE
+// ══════════════════════════════════════════════════
+
+var ARC_TYPES = {
+  promise:    { label:'Promise / Commitment', icon:'📜', bg:'rgba(99,102,241,.12)',  color:'#818cf8' },
+  speech:     { label:'Speech / Address',     icon:'🎤', bg:'rgba(34,197,94,.1)',    color:'var(--c2)' },
+  appearance: { label:'Public Appearance',    icon:'📅', bg:'rgba(6,182,212,.1)',    color:'var(--c1)' },
+  document:   { label:'Official Document',    icon:'📄', bg:'rgba(168,85,247,.1)',   color:'var(--c5)' },
+  media:      { label:'Media / Evidence',     icon:'📸', bg:'rgba(245,158,11,.1)',   color:'var(--c3)' },
+  outcome:    { label:'Outcome Record',       icon:'⚖️', bg:'rgba(59,130,246,.1)',   color:'var(--c6)' }
+};
+
+var ARC_IDP = {
+  water:'Basic Service Delivery', econ:'Local Economic Dev',
+  infra:'Infrastructure Dev', inst:'Institutional Transformation', social:'Social Dev & Safety'
+};
+
+// Seed records — real civic events
+var arcRecords = [
+  {
+    id:1, type:'promise', title:'Water Supply Upgrade — Kuboes Community Meeting',
+    councillor:'Cllr. Lerato Dlamini', ward:'Kuboes Ward · Richtersveld',
+    idp:'water', date:'2025-06-14',
+    desc:'At the Kuboes community hall meeting, Cllr. Dlamini committed to completing borehole drilling and installing a new water storage system by December 2025. Direct quote: Our community will not go another year without reliable water. I am personally accountable for this.',
+    file:null, link:null, status:'inprogress'
+  },
+  {
+    id:2, type:'speech', title:'Inauguration Address — Nama Khoi Ward 3',
+    councillor:'Cllr. Sarah Botha', ward:'Okiep Ward · Nama Khoi',
+    idp:'water', date:'2024-08-22',
+    desc:'Inaugural speech after the 2024 by-election. Committed to community hall lighting, road repairs and weekly ward committee meetings. Full speech transcript uploaded.',
+    file:'Botha_Inauguration_Speech_2024.pdf', link:'https://drive.google.com/file/example1', status:'completed'
+  },
+  {
+    id:3, type:'promise', title:'Youth Skills Center — Nababeep Ward Pledge',
+    councillor:'Ward Committee · Nama Khoi', ward:'Nababeep Ward · Nama Khoi',
+    idp:'social', date:'2025-03-01',
+    desc:'Written pledge signed at the Nababeep community forum. Commitment to establish a youth skills and employment training centre by March 2026. Signed by 3 ward committee members and witnessed by 47 residents.',
+    file:'Youth_Skills_Pledge_Signed.pdf', link:null, status:'pending'
+  },
+  {
+    id:4, type:'document', title:'Ward 3 Development Plan 2025–2026',
+    councillor:'Cllr. Sarah Botha', ward:'Okiep Ward · Nama Khoi',
+    idp:'infra', date:'2025-01-15',
+    desc:'Official signed ward development plan submitted to council. Includes 6 infrastructure projects, budget allocations and delivery timelines. Council resolution: NDM-RES-2025-042.',
+    file:'Ward3_Development_Plan_2025.pdf', link:'https://drive.google.com/file/example2', status:'completed'
+  },
+  {
+    id:5, type:'appearance', title:'Pofadder Community Imbizo — Road Repair Promise',
+    councillor:'Cllr. Pieter Swart', ward:'Pofadder Ward · Khai-Ma',
+    idp:'infra', date:'2025-01-10',
+    desc:'Public imbizo attended by 120 residents. Cllr. Swart committed to commencing pothole repairs on the N14 main road by June 2025. Meeting minutes recorded by ward secretary. Community feedback forms collected.',
+    file:'Pofadder_Imbizo_Minutes_Jan2025.pdf', link:null, status:'flagged'
+  },
+  {
+    id:6, type:'media', title:'Springbok Herald — "Councillor Promises Lights by February"',
+    councillor:'Cllr. Sarah Botha', ward:'Okiep Ward · Nama Khoi',
+    idp:'water', date:'2024-11-03',
+    desc:'Newspaper article with direct quotes from Cllr. Botha confirming the community hall lighting commitment. Published in the Springbok Herald, page 4. Scanned copy uploaded. Promise delivered and verified.',
+    file:'Springbok_Herald_Nov2024_scan.jpg', link:'https://drive.google.com/file/example3', status:'completed'
+  },
+  {
+    id:7, type:'outcome', title:'Verification Report — Community Hall Lighting Delivered',
+    councillor:'Data Steward · Okiep Ward', ward:'Okiep Ward · Nama Khoi',
+    idp:'water', date:'2025-03-02',
+    desc:'Independent Data Steward verification report confirming all 8 community hall lights are operational. On-site inspection conducted 2 March 2025. Photographic evidence attached. Promise status: DELIVERED AND VERIFIED.',
+    file:'Verification_Report_Lighting_Mar2025.pdf', link:'https://drive.google.com/file/example4', status:'completed'
+  }
+];
+
+var arcFilter_cat = 'all';
+var arcFilter_search = '';
+
+function arcRender() {
+  var list = document.getElementById('arcList');
+  if (!list) return;
+
+  var filtered = arcRecords.filter(function(r) {
+    var matchCat = arcFilter_cat === 'all' || r.type === arcFilter_cat;
+    var q = arcFilter_search.toLowerCase();
+    var matchSearch = !q ||
+      r.title.toLowerCase().includes(q) ||
+      r.councillor.toLowerCase().includes(q) ||
+      r.ward.toLowerCase().includes(q) ||
+      r.desc.toLowerCase().includes(q) ||
+      (ARC_IDP[r.idp]||'').toLowerCase().includes(q);
+    return matchCat && matchSearch;
+  });
+
+  // Update result count
+  var rc = document.getElementById('arcResultCount');
+  if (rc) rc.textContent = 'Showing ' + filtered.length + ' of ' + arcRecords.length + ' records';
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="arc-empty">🔍 No records found. Try a different search or category.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(function(r) {
+    var t = ARC_TYPES[r.type] || ARC_TYPES.promise;
+    var statusCol = r.status==='completed'?'var(--c2)':r.status==='inprogress'?'var(--c1)':r.status==='flagged'?'var(--c4)':'var(--muted)';
+    var statusLbl = r.status==='completed'?'✓ Delivered':r.status==='inprogress'?'In Progress':r.status==='flagged'?'⚠ Flagged':'Pending';
+    var fileHtml = r.file ? '<a class="arc-item-link" href="#" onclick="arcOpenFile(event,\''+r.file+'\')">📎 '+r.file+'</a>' : '';
+    var linkHtml = r.link ? '<a class="arc-item-link" href="'+r.link+'" target="_blank">🔗 View in Drive</a>' : '';
+    return '<div class="arc-item" data-id="'+r.id+'" data-type="'+r.type+'">' +
+      '<div class="arc-item-icon" style="background:'+t.bg+'">'+t.icon+'</div>' +
+      '<div class="arc-item-body">' +
+        '<div class="arc-item-title">'+escapeHtml(r.title)+'</div>' +
+        '<div class="arc-item-meta">' +
+          '<span class="arc-item-tag" style="background:'+t.bg+';color:'+t.color+'">'+t.label+'</span>' +
+          '<span class="arc-item-tag" style="background:rgba(255,255,255,.05);color:var(--muted)">📍 '+escapeHtml(r.ward)+'</span>' +
+          '<span class="arc-item-tag" style="background:rgba(255,255,255,.05);color:var(--muted)">'+escapeHtml(r.councillor)+'</span>' +
+        '</div>' +
+        '<div class="arc-item-desc">'+escapeHtml(r.desc)+'</div>' +
+        '<div class="arc-fingerprint">' +
+          '<div class="arc-fp-item"><span class="arc-fp-dot" style="background:var(--c1)"></span>IDP: '+(ARC_IDP[r.idp]||r.idp)+'</div>' +
+          '<div class="arc-fp-item"><span class="arc-fp-dot" style="background:'+statusCol+'"></span>Delivery: <strong style="color:'+statusCol+'">'+statusLbl+'</strong></div>' +
+          (fileHtml ? '<div class="arc-fp-item">'+fileHtml+'</div>' : '') +
+          (linkHtml ? '<div class="arc-fp-item">'+linkHtml+'</div>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="arc-item-right">' +
+        '<div class="arc-item-date">'+arcFormatDate(r.date)+'</div>' +
+        '<button onclick="arcDeleteRecord('+r.id+',event)" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:3px 6px;border-radius:5px;transition:all .2s" onmouseover="this.style.color=\'var(--c4)\'" onmouseout="this.style.color=\'var(--muted)\'">✕ Remove</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  arcUpdateStats();
+}
+
+function arcUpdateStats() {
+  var countAll = document.getElementById('arc-count-all');
+  var types = ['promise','speech','document','media','appearance','outcome'];
+  if (countAll) countAll.textContent = arcRecords.length;
+  types.forEach(function(t) {
+    var el = document.getElementById('arc-count-' + t);
+    if (el) el.textContent = arcRecords.filter(function(r){ return r.type===t; }).length;
+  });
+}
+
+function arcFilter(cat, el) {
+  arcFilter_cat = cat;
+  document.querySelectorAll('.arc-cat').forEach(function(b){ b.classList.remove('on'); });
+  if (el) el.classList.add('on');
+  arcRender();
+}
+
+function arcSearch() {
+  arcFilter_search = (document.getElementById('arcSearchInput')||{}).value || '';
+  arcRender();
+}
+
+function arcClearSearch() {
+  var inp = document.getElementById('arcSearchInput');
+  if (inp) inp.value = '';
+  arcFilter_search = '';
+  arcRender();
+}
+
+function arcSort(mode) {
+  if (mode==='newest') arcRecords.sort(function(a,b){ return b.date.localeCompare(a.date); });
+  else if (mode==='oldest') arcRecords.sort(function(a,b){ return a.date.localeCompare(b.date); });
+  else if (mode==='az') arcRecords.sort(function(a,b){ return a.title.localeCompare(b.title); });
+  else if (mode==='type') arcRecords.sort(function(a,b){ return a.type.localeCompare(b.type); });
+  arcRender();
+}
+
+function arcFormatDate(d) {
+  if (!d) return '—';
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var parts = d.split('-');
+  return parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + parts[0];
+}
+
+function arcFileSelected(input) {
+  var fn = document.getElementById('arcFileName');
+  if (fn && input.files && input.files[0]) {
+    fn.textContent = '📎 ' + input.files[0].name + ' (' + Math.round(input.files[0].size/1024) + ' KB)';
+    fn.style.color = 'var(--c2)';
+  }
+}
+
+function arcOpenFile(e, filename) {
+  e.preventDefault();
+  showToast('Opening: ' + filename + ' — connect Google Drive to enable live preview');
+}
+
+function arcAddRecord() {
+  var title = (document.getElementById('arcTitle')||{}).value||'';
+  var councillor = (document.getElementById('arcCouncillor')||{}).value||'';
+  var ward = (document.getElementById('arcWard')||{}).value||'';
+  var type = (document.getElementById('arcType')||{}).value||'promise';
+  var idp = (document.getElementById('arcIDP')||{}).value||'water';
+  var date = (document.getElementById('arcDate')||{}).value || new Date().toISOString().split('T')[0];
+  var desc = (document.getElementById('arcDesc')||{}).value||'';
+  var link = (document.getElementById('arcDriveLink')||{}).value||'';
+  var fileInput = document.getElementById('arcFile');
+  var filename = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0].name : null;
+
+  if (!title.trim()) { showToast('Please add a title for this record'); return; }
+  if (!councillor.trim()) { showToast('Please add the councillor or speaker name'); return; }
+
+  var newId = arcRecords.length ? Math.max.apply(null, arcRecords.map(function(r){ return r.id; })) + 1 : 1;
+  arcRecords.unshift({
+    id: newId, type: type, title: title.trim(),
+    councillor: councillor.trim(), ward: ward || 'District-Wide',
+    idp: idp, date: date, desc: desc.trim(),
+    file: filename, link: link.trim() || null, status: 'pending'
+  });
+
+  // Clear form
+  ['arcTitle','arcCouncillor','arcDesc','arcDriveLink'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value='';
+  });
+  if (fileInput) fileInput.value = '';
+  var fn = document.getElementById('arcFileName'); if(fn) fn.textContent='';
+
+  arcFilter_cat = 'all';
+  document.querySelectorAll('.arc-cat').forEach(function(b){ b.classList.remove('on'); });
+  var allBtn = document.querySelector('.arc-cat'); if(allBtn) allBtn.classList.add('on');
+
+  arcRender();
+  showToast('✓ Record added to archive — Promise Fingerprint created');
+}
+
+function arcDeleteRecord(id, e) {
+  e.stopPropagation();
+  arcRecords = arcRecords.filter(function(r){ return r.id !== id; });
+  arcRender();
+  showToast('Record removed from archive');
+}
+
+// Init handled by p2pInit above
+
+function calcIDP() {
+  var cats = ['water','econ','infra','inst','social'];
+  var gradients = {
+    water: 'linear-gradient(90deg,var(--c1),var(--c2))',
+    econ:  'linear-gradient(90deg,var(--c2),var(--c3))',
+    infra: 'linear-gradient(90deg,var(--c6),var(--c1))',
+    inst:  'linear-gradient(90deg,var(--c5),var(--c2))',
+    social:'linear-gradient(90deg,var(--c3),var(--c4))'
+  };
+  var labels = {
+    water:'Basic Service Delivery', econ:'Local Economic Dev',
+    infra:'Infrastructure Dev', inst:'Institutional Transformation', social:'Social Dev & Safety'
+  };
+
+  // Count all promise cards by category and status
+  var counts = {};
+  cats.forEach(function(c){ counts[c] = {total:0, done:0, flagged:0, inprog:0}; });
+
+  document.querySelectorAll('.promise-card').forEach(function(card) {
+    var cat = card.getAttribute('data-cat');
+    if (!cat || !counts[cat]) return;
+    counts[cat].total++;
+    if (card.classList.contains('completed'))   counts[cat].done++;
+    else if (card.classList.contains('flagged'))  counts[cat].flagged++;
+    else if (card.classList.contains('inprogress')) counts[cat].inprog++;
+  });
+
+  cats.forEach(function(cat) {
+    var c = counts[cat];
+    if (c.total === 0) return;
+    var pct = Math.round((c.done / c.total) * 100);
+    var grad = c.flagged > 0 ? 'linear-gradient(90deg,var(--c3),var(--c4))' : gradients[cat];
+    var pctColor = pct === 100 ? 'var(--c2)' : pct >= 50 ? 'var(--c1)' : pct > 0 ? 'var(--c3)' : 'var(--c4)';
+    var statusLabel = c.flagged > 0 ? '⚠ Flagged' : pct === 100 ? '✓ Done' : pct >= 50 ? 'On Track' : pct > 0 ? 'Monitor' : 'Not Started';
+    var metaText = c.done + ' of ' + c.total + ' promise' + (c.total !== 1 ? 's' : '') + ' delivered';
+
+    // Update HOME page tracker
+    var fill = document.getElementById('fill-' + cat);
+    var meta = document.getElementById('meta-' + cat);
+    var pctEl = document.getElementById('pct-' + cat);
+    if (fill) { fill.style.width = pct + '%'; fill.style.background = grad; }
+    if (meta) meta.textContent = metaText;
+    if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = pctColor; }
+
+    // Update SALGA report tracker
+    var sfill = document.getElementById('salga-fill-' + cat);
+    var smeta = document.getElementById('salga-meta-' + cat);
+    var spct  = document.getElementById('salga-pct-' + cat);
+    var ssub  = document.getElementById('salga-sub-' + cat);
+    if (sfill) { sfill.style.width = pct + '%'; sfill.style.background = grad; }
+    if (smeta) smeta.textContent = pct + '% complete';
+    if (spct)  { spct.textContent = statusLabel; spct.style.color = pctColor; }
+    if (ssub)  ssub.textContent = metaText;
+  });
+
+  // Also update the 6 home KPI cards
+  var all = document.querySelectorAll('.promise-card');
+  var total = all.length;
+  var done = document.querySelectorAll('.promise-card.completed').length;
+  var inprog = document.querySelectorAll('.promise-card.inprogress').length;
+  var flagged = document.querySelectorAll('.promise-card.flagged').length;
+  var compRate = total > 0 ? Math.round((done/total)*100) : 0;
+
+  // Update KPI strip values by position (they're in order: tracked, completed, inprog, rate, wards, flagged)
+  var kpis = document.querySelectorAll('.kpi-val');
+  if (kpis[0]) kpis[0].textContent = total;
+  if (kpis[1]) kpis[1].textContent = done;
+  if (kpis[2]) kpis[2].textContent = inprog;
+  if (kpis[3]) kpis[3].textContent = compRate + '%';
+  if (kpis[5]) kpis[5].textContent = flagged;
+
+  // Update SALGA report KPI boxes
+  var salga_kpis = document.querySelectorAll('.salga-kpi-val');
+  if (salga_kpis[0]) salga_kpis[0].textContent = total;
+  if (salga_kpis[1]) salga_kpis[1].textContent = done;
+  if (salga_kpis[2]) salga_kpis[2].textContent = inprog;
+  if (salga_kpis[3]) salga_kpis[3].textContent = flagged;
+}
+
+// ── BULLETPROOF INIT ──────────────────────────────
+// Fires multiple ways so buttons always work when opened from downloads folder
+function p2pInit() {
+  // Ensure home page is visible
+  var home = document.getElementById('page-home');
+  if (home && !home.classList.contains('on')) {
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+    home.classList.add('on');
+  }
+  // Mark home nav as active
+  document.querySelectorAll('.nav-link').forEach(function(b){
+    var oc = b.getAttribute('onclick') || '';
+    if (oc.indexOf("'home'") !== -1) b.classList.add('on');
+  });
+  // Run IDP calc and archive render
+  if (typeof calcIDP === 'function') calcIDP();
+  if (typeof arcRender === 'function') arcRender();
+}
+// Robust init - works on file://, http://, and cached pages
+window.onload = function() { p2pInit(); };
+if (document.readyState === 'complete') {
+  setTimeout(p2pInit, 10);
+} else {
+  document.addEventListener('DOMContentLoaded', function() { setTimeout(p2pInit, 10); });
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(function(){ t.style.transform = 'translateX(-50%) translateY(80px)'; }, 2800);
+}
+</script>
+</body>
+</html>
